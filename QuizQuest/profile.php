@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
-$user_id = $_SESSION['user_id']; $username = $_SESSION['username']; $role = $_SESSION['role'];
+$user_id = $_SESSION['user_id']; $username = $_SESSION['user']; $role = $_SESSION['role'];
 $conn = new mysqli("localhost","root","","quizmaker"); if($conn->connect_error){die("Connection failed: ".$conn->connect_error);}
 $info_error = ""; $info_success = "";
 $user_sql = "SELECT id, username, role, full_name, email, created_at, profile_image FROM users WHERE id=?"; $stmt = $conn->prepare($user_sql); $stmt->bind_param("i",$user_id); $stmt->execute(); $user_result = $stmt->get_result();
