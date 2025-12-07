@@ -1,7 +1,6 @@
 <?php
 session_start();
-var_dump($_SESSION); // see what’s actually stored
-exit;
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -15,7 +14,6 @@ $user_id = (int)$_SESSION['user_id'];
 
 // Fetch classes based on role
 if ($role === "teacher") {
-
     // Teachers see only the classes they created
     $stmt = $mysqli->prepare("
         SELECT id, title, section, class_code, created_at 
@@ -26,8 +24,7 @@ if ($role === "teacher") {
     $stmt->bind_param("i", $user_id);
 
 } else if ($role === "student") {
-
-    // Students see classes they are enrolled in (match via class_code)
+    // Students see classes they are enrolled in
     $stmt = $mysqli->prepare("
         SELECT c.id, c.title, c.section, c.class_code, c.created_at
         FROM classes c
@@ -36,7 +33,6 @@ if ($role === "teacher") {
         ORDER BY c.created_at DESC
     ");
     $stmt->bind_param("i", $user_id);
-
 }
 
 $stmt->execute();
@@ -44,6 +40,7 @@ $res = $stmt->get_result();
 $classes = $res->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
