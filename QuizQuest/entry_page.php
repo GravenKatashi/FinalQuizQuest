@@ -10,6 +10,7 @@
 </head>
 
 <body>
+<canvas id="background-canvas"></canvas>
 <header class="header">
     <div class="logo-container">
         <img src="assets/images/logo.png" alt="QuizQuest Logo">
@@ -53,6 +54,8 @@
     </div>
 
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.259.0/dist/lucide.js"></script>
+<script src="teacherscripts.js"></script>
 </body>
 </html>
