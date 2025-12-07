@@ -55,9 +55,13 @@ body {
     background-color: transparent; /* inherit card background */
 }
 
+.leaderboard-card .card-body small.text-muted {
+    color: #ffffff !important;
+}
+
 .leaderboard-card .card-title {
-    font-family: Verdana, Geneva, Tahoma, sans-serif; 
-    font-size: 1.2rem;  /* optional: adjust size */
+    font-family: 'Times New Roman', Times, serif; 
+    font-size: 50px;  /* optional: adjust size */
     font-weight: 700;   /* optional: make bold */
     color: white;
 }
