@@ -1,0 +1,20 @@
+RAW INPUT: {"class_id":5,"class_code":"S9TRZZ3","title":"we shall check","questions":[{"type":"identification","text":"checkingggg","correct":"chechhnyaa","choices":null}]}
+EXTRACTED VALUES: class_id=5, class_code=S9TRZZ3, teacher_id=2, title=we shall check
+DB FETCH CLASS: {"class_code":"S9TRZZ3","teacher_id":2}
+QUIZ INSERTED: quiz_id=32, class_id=5
+RAW INPUT: {"class_id":5,"class_code":"S9TRZZ3","title":"is it still working?","questions":[{"type":"identification","text":"yep working","correct":"is he telling the truth?","choices":null}]}
+EXTRACTED VALUES: class_id=5, class_code=S9TRZZ3, teacher_id=2, title=is it still working?
+DB FETCH CLASS: {"class_code":"S9TRZZ3","teacher_id":2}
+QUIZ INSERTED: quiz_id=33, class_id=5
+RAW INPUT: {"class_id":7,"class_code":"5UNYDVM","title":"can i create?","questions":[{"type":"identification","text":"shii, hopefully yes","correct":"did it work?","choices":null}]}
+EXTRACTED VALUES: class_id=7, class_code=5UNYDVM, teacher_id=2, title=can i create?
+DB FETCH CLASS: {"class_code":"5UNYDVM","teacher_id":2}
+QUIZ INSERTED: quiz_id=34, class_id=7
+RAW INPUT: {"class_id":1,"class_code":"7TXH4GH","title":"introduction","questions":[{"type":"multiple","text":"i love","correct":"D","choices":["you","me","her","berna"]},{"type":"truefalse","text":"mahusay hi bernadette","correct":"True","choices":null}]}
+EXTRACTED VALUES: class_id=1, class_code=7TXH4GH, teacher_id=7, title=introduction
+DB FETCH CLASS: {"class_code":"7TXH4GH","teacher_id":7}
+ERROR: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`quizmaker`.`quizzes`, CONSTRAINT `quizzes_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE)
+RAW INPUT: {"class_id":2,"class_code":"5GZPPAE","title":"quiz 1","questions":[{"type":"multiple","text":"mahusay hi","correct":"A","choices":["bernadette","berna","regir","ms campo"]},{"type":"truefalse","text":"i love bernadette","correct":"True","choices":null}]}
+EXTRACTED VALUES: class_id=2, class_code=5GZPPAE, teacher_id=2, title=quiz 1
+DB FETCH CLASS: {"class_code":"5GZPPAE","teacher_id":2}
+QUIZ INSERTED: quiz_id=20, class_id=2

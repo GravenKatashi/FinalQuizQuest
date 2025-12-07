@@ -1,0 +1,59 @@
+/* leaderboard_view.css */
+body {
+    background: linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
+    color: #fff;
+    min-height: 100vh;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    padding: 30px 0;
+}
+
+/* main card */
+.leaderboard-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* table */
+.leaderboard-table thead th {
+    color: #f1f5f9;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.leaderboard-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+/* alternating rows */
+.table-row-even {
+    background: linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+}
+
+/* rank circle */
+.rank-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* medals */
+.medal { font-size: 18px; margin-left: 6px; }
+.medal.gold { filter: drop-shadow(0 2px 6px rgba(255, 215, 0, 0.15)); }
+.medal.silver { filter: drop-shadow(0 2px 6px rgba(192, 192, 192, 0.12)); }
+.medal.bronze { filter: drop-shadow(0 2px 6px rgba(205, 127, 50, 0.12)); }
+
+/* small responsive tweaks */
+@media (max-width: 720px) {
+    .leaderboard-card { padding: 12px; }
+    .leaderboard-table thead th:nth-child(4), .leaderboard-table td:nth-child(4) {
+        display: none; /* hide total score column on very small screens */
+    }
+}
