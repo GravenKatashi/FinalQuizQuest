@@ -36,6 +36,10 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 
+.leaderboard-card .card-body {
+    color: white;
+}
+
 /* alternating rows */
 .table-row-even {
     background: linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
