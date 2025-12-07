@@ -27,7 +27,7 @@ body {
 
 /* table */
 .leaderboard-table thead th {
-    color: #f1f5f9;
+    color: #000000;
     font-weight: 600;
     border-bottom: 1px solid rgba(255,255,255,0.04);
 }
