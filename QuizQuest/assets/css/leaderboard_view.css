@@ -26,15 +26,26 @@ body {
 }
 
 /* table */
-.leaderboard-table thead th {
-    color: #000000;
-    font-weight: 600;
-    border-bottom: 2px solid rgba(255,255,255, 1);
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse; 
 }
 
-.leaderboard-table tbody tr {
+.leaderboard-table thead th {
+    color: #ffffff; 
+    font-weight: 600;
     border-bottom: 2px solid rgba(255,255,255,1);
+    padding: 8px 12px;
+    text-align: left;
 }
+
+.leaderboard-table tbody td {
+    color: #ffffff; 
+    border-bottom: 1px solid rgba(255,255,255,0.3); 
+    padding: 8px 12px;
+}
+
 
 .leaderboard-card .card-body h2 {
     color: white;
