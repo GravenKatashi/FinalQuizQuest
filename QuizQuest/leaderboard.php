@@ -1,6 +1,7 @@
 <?php
 session_start();
-
+var_dump($_SESSION); // see what’s actually stored
+exit;
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
