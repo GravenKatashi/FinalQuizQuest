@@ -107,10 +107,11 @@ body {
     border-radius: 12px;
     box-shadow: 0px 4px 14px rgba(0,0,0,01);
     height: 570px;
-    margin-right: 30px;
+    margin-right: 70px;
     background: rgba(255, 255, 255, 0.6);
     border: 1px;
     z-index: 1;
+    margin-top: 0px;
 }
 
 .buttons {
