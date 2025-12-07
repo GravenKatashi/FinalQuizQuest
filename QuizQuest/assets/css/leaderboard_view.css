@@ -64,6 +64,12 @@ body {
     color: #ffffff !important;
 }
 
+.leaderboard-card .card-title {
+    font-family: Verdana, Geneva, Tahoma, sans-serif; 
+    font-size: 1.2rem;  /* optional: adjust size */
+    font-weight: 700;   /* optional: make bold */
+}
+
 /* alternating rows */
 .table-row-even {
     background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.00));
