@@ -79,7 +79,7 @@ $conn->close();
 <link rel="stylesheet" href="assets/css/leaderboard_view.css">
 </head>
 <body>
-
+<canvas id="background-canvas"></canvas>
 <div class="container my-5">
     <div class="card shadow-lg leaderboard-card">
         <div class="card-body">
@@ -141,7 +141,16 @@ $conn->close();
     </div>
 </div>
 
-<!-- optional: teacherscripts uses canvas background -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.259.0/dist/lucide.js"></script>
+<script>
+function openLeaderboard(classId) {
+    window.location.href = `leaderboard_view.php?class_id=${classId}`;
+}
+lucide.replace();
+</script>
+
+<!-- Background animation JS -->
 <script src="teacherscripts.js"></script>
 </body>
 </html>
