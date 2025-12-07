@@ -148,7 +148,7 @@ body {
 }
 
 .buttons .dropdown-menu {
-    min-width: 180px; /* same as button width */
+    min-width: 160px; /* same as button width */
     font-size: 20px;
     background-color: #ea96f1;
 }
