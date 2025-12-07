@@ -120,7 +120,7 @@ body {
     transform: translateX(-50%);
     display: flex;
     gap: 60px;
-    padding-bottom: 60px;
+    padding-bottom: 40px;
     overflow: visible; 
     z-index: 10; 
 }
