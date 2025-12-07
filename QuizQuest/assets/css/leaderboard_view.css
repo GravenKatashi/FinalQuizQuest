@@ -55,19 +55,11 @@ body {
     background-color: transparent; /* inherit card background */
 }
 
-
-.leaderboard-card .card-body h2 {
-    color: white;
-}
-
-.leaderboard-card .card-body small.text-muted {
-    color: #ffffff !important;
-}
-
 .leaderboard-card .card-title {
     font-family: Verdana, Geneva, Tahoma, sans-serif; 
     font-size: 1.2rem;  /* optional: adjust size */
     font-weight: 700;   /* optional: make bold */
+    color: white;
 }
 
 /* alternating rows */

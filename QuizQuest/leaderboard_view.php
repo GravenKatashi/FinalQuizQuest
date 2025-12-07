@@ -85,7 +85,7 @@ $conn->close();
         <div class="card-body">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <div>
-                    <h2 class="mb-0"><?php echo htmlspecialchars($class['title']); ?></h2>
+                    <h2 class="mb-0 card-title"><?php echo htmlspecialchars($class['title']); ?></h2>
                     <small class="text-muted">Section: <?php echo htmlspecialchars($class['section']); ?> • Code: <?php echo htmlspecialchars($class_code); ?></small>
                 </div>
                 <div>
