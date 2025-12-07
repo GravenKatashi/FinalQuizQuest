@@ -36,8 +36,12 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 
-.leaderboard-card .card-body {
+.leaderboard-card .card-body h2 {
     color: white;
+}
+
+.leaderboard-card .card-body small.text-muted {
+    color: #ffffff !important;
 }
 
 /* alternating rows */
