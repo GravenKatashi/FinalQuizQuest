@@ -93,7 +93,7 @@ body {
 }
 
 .title img {
-    width: 450px;
+    width: 430px;
     height: auto;
     display: block;
     padding-right: 5px;
@@ -120,7 +120,7 @@ body {
     transform: translateX(-50%);
     display: flex;
     gap: 40px;
-    padding-bottom: 70px;
+    padding-bottom: 50px;
     overflow: visible; 
     z-index: 10; 
 }
