@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_POST['class_code'])) {
         $class_code = trim($_POST['class_code']);
 
-        $stmt = $conn->prepare("SELECT id, title FROM quizzes WHERE class_code = ?");
+        $stmt = $conn->prepare("SELECT id, title FROM classes WHERE class_code = ?");
         $stmt->bind_param("s", $class_code);
         $stmt->execute();
         $result = $stmt->get_result();
