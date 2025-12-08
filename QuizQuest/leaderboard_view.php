@@ -85,22 +85,26 @@ while ($r = $res->fetch_assoc()) {
 $stmt2->close();
 $conn->close();
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Leaderboard - <?php echo htmlspecialchars($class['title']); ?></title>
+<meta charset="utf-8">
+<title><?php echo htmlspecialchars($class['title']); ?> — Leaderboard</title>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/leaderboard_view.css">
 <link rel="stylesheet" href="assets/css/teacher.css">
+
 </head>
 <body>
+
 <canvas id="background-canvas"></canvas>
 
 <div class="sidebar">
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
     <div class="menu-wrapper">
         <div class="nav">
+            <a class="nav-item" href="profile.php">Profile</a>
             <a class="nav-item active" href="leaderboard.php">Leaderboard</a>
         </div>
     </div>
@@ -108,48 +112,101 @@ $conn->close();
 </div>
 
 <div class="content">
-    <div class="glass-card">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="mb-1"><?php echo htmlspecialchars($class['title']); ?></h3>
-                <small class="text-muted">
-                    Section: <?php echo htmlspecialchars($class['section']); ?> • Code: <?php echo htmlspecialchars($class_code); ?>
-                </small>
-            </div>
-            <a href="leaderboard.php" class="btn btn-outline-light">← Back</a>
-        </div>
+    <div class="container-fluid my-5 px-4">
+    <div class="card shadow-lg leaderboard-card">
+        <div class="card-body">
 
-        <?php if (empty($leaderboard)): ?>
-            <div class="alert alert-info">No quiz results yet.</div>
-        <?php else: ?>
-        <div class="table-responsive">
-            <table class="table table-borderless leaderboard-table align-middle">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Quiz</th>
-                        <th class="text-end">Score</th>
-                        <th class="text-end">EXP</th>
-                        <th>Title</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($leaderboard as $row): ?>
-                    <tr>
-                        <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($row['quiz_name'] ?: '—'); ?></td>
-                        <td class="text-end"><?php echo (int)$row['score']; ?></td>
-                        <td class="text-end"><?php echo (int)$row['exp']; ?></td>
-                        <td><?php echo htmlspecialchars($row['title'] ?: '—'); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h2 class="mb-0"><?php echo htmlspecialchars($class['title']); ?></h2>
+                    <small class="text-muted">
+                        Section: <?php echo htmlspecialchars($class['section']); ?> • 
+                        Code: <?php echo htmlspecialchars($class_code); ?>
+                    </small>
+                </div>
+                <div>
+                    <a href="leaderboard.php" class="btn btn-outline-secondary">
+                        ← Back to Leaderboards
+                    </a>
+                </div>
+            </div>
+
+            <?php if (empty($leaderboard)): ?>
+                <div class="alert alert-info mb-0">
+                    No quiz results yet.
+                </div>
+            <?php else: ?>
+
+            <div class="table-responsive">
+                <table class="table table-borderless align-middle leaderboard-table">
+
+                    <thead>
+                        <tr>
+                            <th style="width: 80px">#</th>
+                            <th>Student</th>
+                            <th>Quiz</th>
+                            <th class="text-end" style="width: 120px">Score</th>
+                            <th class="text-end" style="width: 120px">EXP</th>
+                            <th style="width: 160px">Title</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <?php $rank = 1; ?>
+                        <?php foreach ($leaderboard as $i => $row): ?>
+
+                        <?php
+                        $medal = '';
+                        if ($i === 0) $medal = '<span class="medal gold">🥇</span>';
+                        elseif ($i === 1) $medal = '<span class="medal silver">🥈</span>';
+                        elseif ($i === 2) $medal = '<span class="medal bronze">🥉</span>';
+                        ?>
+
+                        <tr class="<?php echo ($i % 2 === 0) ? 'table-row-even' : ''; ?>">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="rank-circle me-2">
+                                        <?php echo $rank++; ?>
+                                    </div>
+                                    <?php echo $medal; ?>
+                                </div>
+                            </td>
+
+                            <td>
+                                <strong><?php echo htmlspecialchars($row['name']); ?></strong>
+                            </td>
+
+                            <td>
+                                <?php echo htmlspecialchars($row['quiz_name'] ?: '—'); ?>
+                            </td>
+
+                            <td class="text-end">
+                                <?php echo (int)$row['score']; ?>
+                            </td>
+
+                            <td class="text-end">
+                                <strong><?php echo (int)$row['exp']; ?></strong>
+                            </td>
+
+                            <td>
+                                <?php echo htmlspecialchars($row['title'] ?: '—'); ?>
+                            </td>
+                        </tr>
+
+                        <?php endforeach; ?>
+                    </tbody>
+
+                </table>
+            </div>
+
+            <?php endif; ?>
+
         </div>
-        <?php endif; ?>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="teacherscripts.js"></script>
+
 </body>
 </html>
