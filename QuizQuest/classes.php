@@ -25,6 +25,23 @@ if ($resultName && $rowName = $resultName->fetch_assoc()) {
 }
 $stmtName->close();
 
+if ($role === 'teacher' && $_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['title']) && !empty($_POST['section'])) {
+    $title = trim($_POST['title']);
+    $section = trim($_POST['section']);
+    
+    // Generate a unique class code, e.g., 6 uppercase letters
+    $class_code = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+
+    $stmtInsert = $mysqli->prepare("INSERT INTO classes (title, section, class_code, teacher_id, created_at) VALUES (?, ?, ?, ?, NOW())");
+    $stmtInsert->bind_param("sssi", $title, $section, $class_code, $user_id);
+    $stmtInsert->execute();
+    $stmtInsert->close();
+
+    // Redirect to refresh page and show new class
+    header("Location: classes.php");
+    exit;
+}
+
 // Fetch classes based on role
 if ($role === 'teacher') {
     $stmt = $mysqli->prepare("SELECT id, title, section, class_code, created_at FROM classes WHERE teacher_id = ? ORDER BY created_at DESC");
