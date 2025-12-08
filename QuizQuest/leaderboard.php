@@ -41,17 +41,16 @@ if ($role === "teacher") {
             c.section,
             c.class_code,
             c.created_at,
-            COUNT(sq.id) AS stat_count
-        FROM student_classes sc
-        JOIN classes c ON UPPER(c.class_code) = UPPER(sc.class_code)
+            COUNT(DISTINCT sq.id) AS stat_count
+        FROM classes c
+        LEFT JOIN student_classes sc ON UPPER(sc.class_code) = UPPER(c.class_code) AND sc.student_id = ?
         LEFT JOIN quizzes q ON q.class_code = c.class_code
-        LEFT JOIN student_quizzes sq 
-            ON sq.quiz_id = q.id AND sq.student_id = sc.student_id
-        WHERE sc.student_id = ?
+        LEFT JOIN student_quizzes sq ON sq.quiz_id = q.id AND sq.student_id = ?
+        WHERE sc.student_id IS NOT NULL OR sq.student_id IS NOT NULL
         GROUP BY c.id, c.title, c.section, c.class_code, c.created_at
         ORDER BY c.created_at DESC
     ");
-    $stmt->bind_param("i", $user_id);
+    $stmt->bind_param("ii", $user_id);
 }
 
 $stmt->execute();
