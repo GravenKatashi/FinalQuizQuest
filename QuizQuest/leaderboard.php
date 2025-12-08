@@ -93,7 +93,7 @@ $mysqli->close();
         <div class="nav">
             <a class="nav-item" href="profile.php">
                 <i data-lucide="user"></i>
-                <span>Profile</span>
+                <span>Profile (<?=htmlspecialchars($username)?>)</span>
             </a>
 
             <?php if ($role === "teacher"): ?>
