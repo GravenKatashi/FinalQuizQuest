@@ -13,7 +13,6 @@ if ($mysqli->connect_error) {
 
 $role = $_SESSION['role'];
 $user_id = (int) $_SESSION['user_id'];
-$username = $_SESSION['username'] ?? 'User';
 
 /*
 |--------------------------------------------------------------------------
@@ -42,7 +41,8 @@ if ($role === "teacher") {
     ");
     $stmt->bind_param("i", $user_id);
 
-} else { // ✅ STUDENT — SHOW JOINED CLASSES + QUIZ CLASSES (EVEN 0 QUIZZES)
+} else { // student
+
     $stmt = $mysqli->prepare("
         SELECT 
             c.id AS class_id,
@@ -50,13 +50,14 @@ if ($role === "teacher") {
             c.section,
             c.class_code,
             c.created_at,
-            COUNT(DISTINCT sq.quiz_id) AS stat_count
+            COUNT(sq.id) AS stat_count
         FROM student_classes sc
         JOIN classes c ON c.class_code = sc.class_code
         LEFT JOIN quizzes q ON q.class_code = c.class_code
-        LEFT JOIN student_quizzes sq ON sq.quiz_id = q.id AND sq.student_id = ?
+        LEFT JOIN student_quizzes sq 
+            ON sq.quiz_id = q.id AND sq.student_id = ?
         WHERE sc.student_id = ?
-        GROUP BY c.id, c.title, c.section, c.class_code, c.created_at
+        GROUP BY c.id
         ORDER BY c.created_at DESC
     ");
     $stmt->bind_param("ii", $user_id, $user_id);
@@ -90,27 +91,15 @@ $mysqli->close();
 
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="profile.php">
-                <i data-lucide="user"></i>
-                <span>Profile (<?=htmlspecialchars($username)?>)</span>
-            </a>
+            <a class="nav-item" href="profile.php">Profile</a>
 
             <?php if ($role === "teacher"): ?>
-                <a class="nav-item" href="classes.php">
-                    <i data-lucide="layout"></i>
-                    <span>Classes</span>
-                </a>
+                <a class="nav-item" href="classes.php">Classes</a>
             <?php else: ?>
-                <a class="nav-item" href="student.php">
-                    <i data-lucide="file-text"></i>
-                    <span>Quizzes</span>
-                </a>
+                <a class="nav-item" href="student.php">Quizzes</a>
             <?php endif; ?>
 
-            <a class="nav-item active" href="leaderboard.php">
-                <i data-lucide="award"></i>
-                <span>Leaderboard</span>
-            </a>
+            <a class="nav-item active" href="leaderboard.php">Leaderboard</a>
         </div>
     </div>
 
@@ -180,10 +169,6 @@ $mysqli->close();
 function openLeaderboard(classId) {
     window.location.href = `leaderboard_view.php?class_id=${classId}`;
 }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.259.0/dist/lucide.js"></script>
-<script>
-    lucide.replace();
 </script>
 <script src="teacherscripts.js"></script>
 
