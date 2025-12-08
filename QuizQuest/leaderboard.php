@@ -50,7 +50,7 @@ if ($role === "teacher") {
         GROUP BY c.id, c.title, c.section, c.class_code, c.created_at
         ORDER BY c.created_at DESC
     ");
-    $stmt->bind_param("i", $user_id);
+    $stmt->bind_param("ii", $user_id, $user_id);
 }
 
 $stmt->execute();
