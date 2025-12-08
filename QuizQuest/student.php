@@ -9,7 +9,7 @@ $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $student_id = $_SESSION['user_id'] ?? 0;
-$username = $_SESSION['username'] ?? 'Student';
+$username = $_SESSION['username'] ?? 0;
 
 $feedback = '';
 
