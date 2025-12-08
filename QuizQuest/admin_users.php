@@ -103,8 +103,8 @@ $users = $mysqli->query("SELECT id, full_name, username, email, role, school_aff
     <?php echo $feedback; ?>
 
     <!-- Add User Form -->
-    <div class="card subject-card-style">
-        <div class="card mb-4 shadow-sm">
+    <div class="card mb-4 shadow-sm">
+        <div class="card subject-card-style">
             <div class="card-body">
                 <h5 class="card-title mb-3">Add New User</h5>
                 <form method="POST" class="row g-2">
@@ -140,8 +140,8 @@ $users = $mysqli->query("SELECT id, full_name, username, email, role, school_aff
     </div>
 
     <!-- Users Table -->
-    <div class="card subject-card-style">
-        <div class="card shadow-sm">
+    <div class="card shadow-sm">
+        <div class="card subject-card-style">
             <div class="card-body">
                 <h5 class="card-title mb-3">Existing Users</h5>
                 <div class="table-responsive">
@@ -192,6 +192,7 @@ $users = $mysqli->query("SELECT id, full_name, username, email, role, school_aff
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.259.0/dist/lucide.js"></script>
+<script src="teacherscripts.js"></script>
 <script>lucide.replace();</script>
 </body>
 </html>
