@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+// --- Database Connection ---
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -9,9 +10,11 @@ $dbname = "quizmaker";
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
+// --- Initialize variables ---
 $message = "";
 $error = "";
 
+// --- Process form submission ---
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
     $email = trim($_POST["email"]);
 
@@ -20,48 +23,60 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
     } else {
         // Find user by email
         $stmt = $conn->prepare("SELECT id, username FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        if ($stmt) {
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-        if ($result->num_rows === 1) {
-            $user = $result->fetch_assoc();
-            $user_id = $user["id"];
+            if ($result && $result->num_rows === 1) {
+                $user = $result->fetch_assoc();
+                $user_id = $user["id"];
 
-            // Create reset token
-            $token = bin2hex(random_bytes(32));
-            $expires_at = date("Y-m-d H:i:s", time() + 3600);
+                // Create reset token
+                $token = bin2hex(random_bytes(32));
+                $expires_at = date("Y-m-d H:i:s", time() + 3600);
 
-            $conn->prepare("DELETE FROM password_resets WHERE user_id = ?")
-                 ->bind_param("i", $user_id)
-                 ->execute();
+                // Delete old tokens safely
+                $stmtDelete = $conn->prepare("DELETE FROM password_resets WHERE user_id = ?");
+                if ($stmtDelete) {
+                    $stmtDelete->bind_param("i", $user_id);
+                    $stmtDelete->execute();
+                }
 
-            $stmtInsert = $conn->prepare("
-                INSERT INTO password_resets (user_id, token, expires_at)
-                VALUES (?, ?, ?)
-            ");
-            $stmtInsert->bind_param("iss", $user_id, $token, $expires_at);
-            $stmtInsert->execute();
+                // Insert new token safely
+                $stmtInsert = $conn->prepare("INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)");
+                if ($stmtInsert) {
+                    $stmtInsert->bind_param("iss", $user_id, $token, $expires_at);
+                    $stmtInsert->execute();
+                }
 
-            $resetLink = "http://localhost/QuizQuest/reset_password.php?token=" . urlencode($token);
+                // Build reset link
+                $resetLink = "http://localhost/QuizQuest/reset_password.php?token=" . urlencode($token);
 
-            $subject = "QuizQuest Password Reset";
-            $body = "Hello,\n\n"
-                  . "We received a request to reset your QuizQuest password.\n"
-                  . "Click the link below to reset it (valid for 1 hour):\n\n"
-                  . $resetLink . "\n\n"
-                  . "If you did not request this, you can ignore this email.";
+                // Send email
+                $subject = "QuizQuest Password Reset";
+                $body = "Hello,\n\n"
+                      . "We received a request to reset your QuizQuest password.\n"
+                      . "Click the link below to reset it (valid for 1 hour):\n\n"
+                      . $resetLink . "\n\n"
+                      . "If you did not request this, you can ignore this email.";
 
-            $headers  = "From: no-reply@quizquest.local\r\n";
-            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                $headers  = "From: no-reply@quizquest.local\r\n";
+                $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
-            if (mail($email, $subject, $body, $headers)) {
-                $message = "If an account with that email exists, a reset link has been sent.";
+                if (mail($email, $subject, $body, $headers)) {
+                    $message = "If an account with that email exists, a reset link has been sent.";
+                } else {
+                    $error = "Unable to send reset email. Please contact the administrator.";
+                }
+
             } else {
-                $error = "Unable to send reset email. Please contact the administrator.";
+                // Generic message to avoid revealing account existence
+                $message = "If an account with that email exists, a reset link has been sent.";
             }
+
         } else {
-            $message = "If an account with that email exists, a reset link has been sent.";
+            $error = "Database error: " . $conn->error;
         }
     }
 }
@@ -126,4 +141,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
 <script src="teacherscripts.js"></script>
 </body>
 </html>
+
 <?php $conn->close(); ?>
