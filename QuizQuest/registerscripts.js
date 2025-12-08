@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("form");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = form.querySelector("input[name='confirm_password']");
 
     // Tooltip for password
     let tooltip;
@@ -22,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
             tooltip.remove();
             tooltip = null;
         }
-        // Validate password on blur
         if (passwordInput.value.length < 8) {
             passwordInput.classList.add("invalid");
         } else {
@@ -30,7 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Email validation (must contain @)
+    confirmPasswordInput.addEventListener("blur", () => {
+        if (confirmPasswordInput.value.length < 8) {
+            confirmPasswordInput.classList.add("invalid");
+        } else {
+            confirmPasswordInput.classList.remove("invalid");
+        }
+    });
+
+    // Email validation
     function validateEmail(email) {
         return email.includes("@");
     }
@@ -51,20 +59,39 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // All other required fields
+    // Required inputs (username, full name, school affiliation)
     const requiredInputs = form.querySelectorAll("input:not([type='password']):not(#email)");
 
     requiredInputs.forEach(input => {
         input.addEventListener("blur", () => {
-            if (input.value.trim() === "") {
+            if (input.value.trim().length === 0) {
                 input.classList.add("invalid");
             } else {
                 input.classList.remove("invalid");
             }
         });
+
+        input.addEventListener("input", () => {
+            if (input.value.trim().length > 0) {
+                input.classList.remove("invalid");
+            }
+        });
     });
 
-    // Form submission check
+    // Password & Confirm Password input listeners for real-time removal
+    passwordInput.addEventListener("input", () => {
+        if (passwordInput.value.length >= 8) {
+            passwordInput.classList.remove("invalid");
+        }
+    });
+
+    confirmPasswordInput.addEventListener("input", () => {
+        if (confirmPasswordInput.value.length >= 8) {
+            confirmPasswordInput.classList.remove("invalid");
+        }
+    });
+
+    // Form submission
     form.addEventListener("submit", (e) => {
         let valid = true;
 
@@ -74,15 +101,17 @@ document.addEventListener("DOMContentLoaded", () => {
         // Check password
         if (passwordInput.value.length < 8) valid = false;
 
-        // Check required fields
+        // Check confirm password
+        if (confirmPasswordInput.value.length < 8) valid = false;
+
+        // Check required inputs
         requiredInputs.forEach(input => {
-            if (input.value.trim() === "") {
+            if (input.value.trim().length === 0) {
                 input.classList.add("invalid");
                 valid = false;
             }
         });
 
-        // Focus on first invalid field
         if (!valid) {
             e.preventDefault();
             const firstInvalid = form.querySelector(".invalid");
