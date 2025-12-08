@@ -215,7 +215,7 @@ function renderCompletedQuizzes($conn, $student_id) {
     <div class="menu-wrapper">
         <div class="nav">
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($student_name); ?>)
+                <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($username); ?>)
             </a>
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='student.php'){echo 'active';} ?>" href="student.php">
                 <i data-lucide="layout"></i> Classes
