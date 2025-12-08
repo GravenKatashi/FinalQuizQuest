@@ -47,18 +47,16 @@ $class_code = $class['class_code'];
    ✅ Show 0 EXP if no student_exp record exists
 ----------------------------- */
 $sql = "
-SELECT
+SELECT 
     u.id AS student_id,
     COALESCE(u.full_name, u.username) AS name,
     COALESCE(se.exp, 0) AS exp,
-    COALESCE(se.title, '') AS title
+    COALESCE(se.title, 'newbie') AS title
 FROM student_classes sc
-JOIN users u
-    ON u.id = sc.student_id
-LEFT JOIN student_exp se
-    ON se.student_id = u.id
-    AND UPPER(se.class_code) = UPPER(sc.class_code)
-WHERE UPPER(sc.class_code) = UPPER(?)
+JOIN users u ON u.id = sc.student_id
+LEFT JOIN student_exp se 
+    ON se.student_id = u.id AND se.class_code = sc.class_code
+WHERE sc.class_code = ?
 ORDER BY exp DESC, name ASC
 ";
 
