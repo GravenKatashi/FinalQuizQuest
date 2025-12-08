@@ -43,7 +43,7 @@ if ($role === "teacher") {
             c.created_at,
             COUNT(sq.id) AS stat_count
         FROM student_classes sc
-        JOIN classes c ON c.class_code = sc.class_code
+        JOIN classes c ON UPPER(c.class_code) = UPPER(sc.class_code)
         LEFT JOIN quizzes q ON q.class_code = c.class_code
         LEFT JOIN student_quizzes sq 
             ON sq.quiz_id = q.id AND sq.student_id = sc.student_id
@@ -85,7 +85,7 @@ $mysqli->close();
             <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
                 <i data-lucide="user"></i> Profile (<?=htmlspecialchars($username)?>)
             </a>
-            <a class="nav-item <?= $currentPage === 'classes.php' ? 'active' : '' ?>" href="classes.php">
+            <a class="nav-item <?= $currentPage === 'student.php' ? 'active' : '' ?>" href="student.php">
                 <i data-lucide="layout"></i> Classes
             </a>
             <a class="nav-item <?= $currentPage === 'leaderboard.php' ? 'active' : '' ?>" href="leaderboard.php">
