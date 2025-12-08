@@ -77,7 +77,7 @@ $users = $mysqli->query("SELECT id, full_name, username, email, role, school_aff
 <meta charset="utf-8">
 <title>Admin Dashboard - Users</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/teacher.css">
+<link rel="stylesheet" href="assets/css/admin_users.css">
 </head>
 <body>
 <canvas id="background-canvas"></canvas>
@@ -103,84 +103,88 @@ $users = $mysqli->query("SELECT id, full_name, username, email, role, school_aff
     <?php echo $feedback; ?>
 
     <!-- Add User Form -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Add New User</h5>
-            <form method="POST" class="row g-2">
-                <input type="hidden" name="action" value="add">
-                <div class="col-md-4">
-                    <input type="text" name="full_name" class="form-control form-control-sm" placeholder="Full Name" required>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" name="username" class="form-control form-control-sm" placeholder="Username" required>
-                </div>
-                <div class="col-md-3">
-                    <input type="email" name="email" class="form-control form-control-sm" placeholder="Email" required>
-                </div>
-                <div class="col-md-2">
-                    <select name="role" class="form-select form-select-sm" required>
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" name="school_affiliation" class="form-control form-control-sm" placeholder="School (optional)">
-                </div>
-                <div class="col-md-3">
-                    <input type="password" name="password" class="form-control form-control-sm" placeholder="Password" required>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-success btn-sm w-100">Add User</button>
-                </div>
-            </form>
+    <div class="card subject-card-style">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Add New User</h5>
+                <form method="POST" class="row g-2">
+                    <input type="hidden" name="action" value="add">
+                    <div class="col-md-4">
+                        <input type="text" name="full_name" class="form-control form-control-sm" placeholder="Full Name" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="username" class="form-control form-control-sm" placeholder="Username" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="email" name="email" class="form-control form-control-sm" placeholder="Email" required>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="role" class="form-select form-select-sm" required>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="school_affiliation" class="form-control form-control-sm" placeholder="School (optional)">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="password" name="password" class="form-control form-control-sm" placeholder="Password" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success btn-sm w-100">Add User</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- Users Table -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Existing Users</h5>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Full Name</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>School</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while($user = $users->fetch_assoc()): ?>
-                        <tr>
-                            <form method="POST">
-                                <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
-                                <td><?php echo $user['id']; ?></td>
-                                <td><input type="text" name="full_name" value="<?php echo htmlspecialchars($user['full_name']); ?>" class="form-control form-control-sm"></td>
-                                <td><input type="text" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" class="form-control form-control-sm"></td>
-                                <td><input type="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" class="form-control form-control-sm"></td>
-                                <td>
-                                    <select name="role" class="form-select form-select-sm">
-                                        <option value="student" <?php if($user['role']==='student') echo 'selected'; ?>>Student</option>
-                                        <option value="teacher" <?php if($user['role']==='teacher') echo 'selected'; ?>>Teacher</option>
-                                        <option value="admin" <?php if($user['role']==='admin') echo 'selected'; ?>>Admin</option>
-                                    </select>
-                                </td>
-                                <td><input type="text" name="school_affiliation" value="<?php echo htmlspecialchars($user['school_affiliation']); ?>" class="form-control form-control-sm"></td>
-                                <td class="d-flex gap-1">
-                                    <input type="password" name="password" class="form-control form-control-sm" placeholder="New Password">
-                                    <button type="submit" name="action" value="update" class="btn btn-primary btn-sm">Update</button>
-                                    <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm" onclick="return confirm('Delete this user?');">Delete</button>
-                                </td>
-                            </form>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+    <div class="card subject-card-style">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Existing Users</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>School</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while($user = $users->fetch_assoc()): ?>
+                            <tr>
+                                <form method="POST">
+                                    <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
+                                    <td><?php echo $user['id']; ?></td>
+                                    <td><input type="text" name="full_name" value="<?php echo htmlspecialchars($user['full_name']); ?>" class="form-control form-control-sm"></td>
+                                    <td><input type="text" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" class="form-control form-control-sm"></td>
+                                    <td><input type="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" class="form-control form-control-sm"></td>
+                                    <td>
+                                        <select name="role" class="form-select form-select-sm">
+                                            <option value="student" <?php if($user['role']==='student') echo 'selected'; ?>>Student</option>
+                                            <option value="teacher" <?php if($user['role']==='teacher') echo 'selected'; ?>>Teacher</option>
+                                            <option value="admin" <?php if($user['role']==='admin') echo 'selected'; ?>>Admin</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" name="school_affiliation" value="<?php echo htmlspecialchars($user['school_affiliation']); ?>" class="form-control form-control-sm"></td>
+                                    <td class="d-flex gap-1">
+                                        <input type="password" name="password" class="form-control form-control-sm" placeholder="New Password">
+                                        <button type="submit" name="action" value="update" class="btn btn-primary btn-sm">Update</button>
+                                        <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm" onclick="return confirm('Delete this user?');">Delete</button>
+                                    </td>
+                                </form>
+                            </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
