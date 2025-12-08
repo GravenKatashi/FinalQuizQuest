@@ -13,6 +13,8 @@ if ($mysqli->connect_error) {
 
 $role = $_SESSION['role'];
 $user_id = (int) $_SESSION['user_id'];
+$username = $_SESSION['username'] ?? 'User'; // <--- add this line
+
 
 if ($role === "teacher") {
     $stmt = $mysqli->prepare("
