@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
+    // Email validation
     emailInput.addEventListener("input", () => {
         if (!validateEmail(emailInput.value)) {
             emailInput.classList.add("invalid");
@@ -19,16 +20,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Show password helper on focus
+    passwordInput.addEventListener("focus", () => {
+        passwordMsg.style.display = "block";
+    });
+
+    passwordInput.addEventListener("blur", () => {
+        passwordMsg.style.display = "none";
+    });
+
+    // Password validation
     passwordInput.addEventListener("input", () => {
         if (passwordInput.value.length < 8) {
             passwordInput.classList.add("invalid");
-            passwordMsg.textContent = "Minimum 8 characters required";
         } else {
             passwordInput.classList.remove("invalid");
-            passwordMsg.textContent = "";
         }
     });
 
+    // Form submission check
     form.addEventListener("submit", (e) => {
         let valid = true;
         if (!validateEmail(emailInput.value)) valid = false;
@@ -36,7 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!valid) {
             e.preventDefault(); // Prevent submission
-            emailInput.focus();
+            if (!validateEmail(emailInput.value)) emailInput.focus();
+            else passwordInput.focus();
         }
     });
 });
