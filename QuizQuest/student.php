@@ -32,7 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $input_code = trim($_POST['class_code']);
 
         // Case-insensitive check for class code in classes table
-        $stmt = $conn->prepare("SELECT id FROM classes WHERE UPPER(class_code) = UPPER(?)");
+        $stmt = $conn->prepare("
+            SELECT id, title 
+            FROM classes 
+            WHERE UPPER(class_code) = UPPER(?)
+        ");
         $stmt->bind_param("s", $input_code);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -46,14 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($checkResult->num_rows === 0) {
 
-    // ✅ Always store class code in UPPERCASE to match leaderboard join
             $cleanCode = strtoupper(trim($input_code));
+            $classTitle = $row['title'];
 
             $stmtInsert = $conn->prepare("
-                INSERT INTO student_classes (student_id, class_code) 
-                VALUES (?, ?)
+                INSERT INTO student_classes (student_id, class_code, title)
+                VALUES (?, ?, ?)
             ");
-            $stmtInsert->bind_param("is", $student_id, $cleanCode);
+            $stmtInsert->bind_param("iss", $student_id, $cleanCode, $classTitle);
             $stmtInsert->execute();
 
             $feedback = "<div class='alert alert-success'>Class added and will now appear in Leaderboard!</div>";
