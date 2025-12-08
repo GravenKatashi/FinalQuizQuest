@@ -13,6 +13,7 @@ if ($mysqli->connect_error) {
 
 $user_id = (int)($_SESSION['user_id']);
 $role = $_SESSION['role'] ?? 'User';
+$classesPage = ($role === 'teacher') ? 'teacher.php' : 'student.php';
 
 // Fetch full name from database
 $full_name = 'User';
@@ -94,7 +95,7 @@ $mysqli->close();
             <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
                 <i data-lucide="user"></i> Profile (<?= htmlspecialchars($full_name) ?>)
             </a>
-            <a class="nav-item <?= $currentPage === 'student.php' ? 'active' : '' ?>" href="student.php">
+            <a class="nav-item <?= $currentPage === $classesPage ? 'active' : '' ?>" href="<?= $classesPage ?>">
                 <i data-lucide="layout"></i> Classes
             </a>
             <a class="nav-item <?= $currentPage === 'leaderboard.php' ? 'active' : '' ?>" href="leaderboard.php">
