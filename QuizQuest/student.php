@@ -11,84 +11,136 @@ if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 $student_id = $_SESSION['user_id'] ?? 0;
 $student_name = $_SESSION['username'] ?? 'Student';
 
-// Handle class code submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['class_code'])) {
-        $class_code = trim($_POST['class_code']);
+$feedback = '';
 
-        $stmt = $conn->prepare("SELECT id, title FROM classes WHERE class_code = ?");
-        $stmt->bind_param("s", $class_code);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // --- Add Class Code ---
+    if (!empty($_POST['class_code'])) {
+        $input_code = trim($_POST['class_code']);
+
+        // Case-insensitive check for class code in classes table
+        $stmt = $conn->prepare("SELECT id FROM classes WHERE UPPER(class_code) = UPPER(?)");
+        $stmt->bind_param("s", $input_code);
         $stmt->execute();
         $result = $stmt->get_result();
 
-        if ($result->num_rows > 0) {
-            $stmtCheck = $conn->prepare("SELECT * FROM student_classes WHERE student_id = ? AND class_code = ?");
-            $stmtCheck->bind_param("is", $student_id, $class_code);
+        if ($result && $result->num_rows > 0) {
+            // Check if student already joined this class
+            $stmtCheck = $conn->prepare("SELECT * FROM student_classes WHERE student_id = ? AND UPPER(class_code) = UPPER(?)");
+            $stmtCheck->bind_param("is", $student_id, $input_code);
             $stmtCheck->execute();
             $checkResult = $stmtCheck->get_result();
 
             if ($checkResult->num_rows === 0) {
-                $stmtInsert = $conn->prepare("INSERT INTO student_classes (student_id, class_code) VALUES (?, ?)");
-                $stmtInsert->bind_param("is", $student_id, $class_code);
-                $stmtInsert->execute();
+
+    // ✅ Always store class code in UPPERCASE to match leaderboard join
+            $cleanCode = strtoupper(trim($input_code));
+
+            $stmtInsert = $conn->prepare("
+                INSERT INTO student_classes (student_id, class_code) 
+                VALUES (?, ?)
+            ");
+            $stmtInsert->bind_param("is", $student_id, $cleanCode);
+            $stmtInsert->execute();
+
+            $feedback = "<div class='alert alert-success'>Class added and will now appear in Leaderboard!</div>";
+            } else {
+                $feedback = "<div class='alert alert-info'>You have already joined this class.</div>";
             }
+
+            $stmtCheck->close();
         } else {
-            $error = "Invalid class code.";
+            $feedback = "<div class='alert alert-danger'>Invalid class code. Please check with your teacher.</div>";
         }
+
+        $stmt->close();
     }
 
+    // --- Remove Class Code ---
     if (!empty($_POST['remove_class_code'])) {
         $remove_code = trim($_POST['remove_class_code']);
-        $stmtRemove = $conn->prepare("DELETE FROM student_classes WHERE student_id = ? AND class_code = ?");
+        $stmtRemove = $conn->prepare("DELETE FROM student_classes WHERE student_id = ? AND UPPER(class_code) = UPPER(?)");
         $stmtRemove->bind_param("is", $student_id, $remove_code);
         $stmtRemove->execute();
+        $feedback = "<div class='alert alert-warning'>Class removed successfully.</div>";
+        $stmtRemove->close();
     }
 }
 
-// Render active class cards
 function renderClassCards($conn, $student_id) {
+    // Get classes student joined OR has taken at least one quiz
     $stmt = $conn->prepare("
-        SELECT sc.class_code, q.title AS quiz_title, u.full_name AS teacher_name
-        FROM student_classes sc
-        JOIN quizzes q ON sc.class_code = q.class_code
-        JOIN users u ON q.teacher_id = u.id
-        WHERE sc.student_id = ?
-        ORDER BY q.created_at DESC
+        SELECT DISTINCT c.class_code, c.title AS class_title, c.section, u.full_name AS teacher_name
+        FROM classes c
+        JOIN users u ON c.teacher_id = u.id
+        LEFT JOIN student_classes sc ON UPPER(sc.class_code) = UPPER(c.class_code) AND sc.student_id = ?
+        LEFT JOIN student_quizzes sq ON sq.quiz_id IN (SELECT id FROM quizzes WHERE UPPER(class_code) = UPPER(c.class_code)) AND sq.student_id = ?
+        WHERE sc.student_id IS NOT NULL OR sq.student_id IS NOT NULL
+        ORDER BY c.created_at DESC
     ");
-    $stmt->bind_param("i", $student_id);
+    $stmt->bind_param("ii", $student_id, $student_id);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $classes = $stmt->get_result();
 
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $class_code = htmlspecialchars($row['class_code']);
-            $quiz_title = htmlspecialchars($row['quiz_title']);
-            $teacher_name = htmlspecialchars($row['teacher_name']);
+    if ($classes && $classes->num_rows > 0) {
+        while ($class = $classes->fetch_assoc()) {
+            $class_code = htmlspecialchars($class['class_code']);
+            $class_title = htmlspecialchars($class['class_title']);
+            $section = htmlspecialchars($class['section']);
+            $teacher_name = htmlspecialchars($class['teacher_name']);
 
-            echo '<div class="col-md-4 col-sm-6">';
-            echo '  <div class="card subject-card h-100">';
-            echo '    <div class="card-body d-flex flex-column">';
-            echo '      <div class="d-flex justify-content-between align-items-start mb-2">';
-            echo '        <h5 class="card-title mb-0">' . $quiz_title . '</h5>';
-            echo '        <span class="badge bg-primary">Code: ' . $class_code . '</span>';
-            echo '      </div>';
-            echo '      <p class="card-text small text-muted mb-3">Teacher: ' . $teacher_name . '</p>';
-            echo '      <div class="mt-auto d-flex gap-2">';
-            echo '        <a href="student_class.php?class_code=' . urlencode($class_code) . '" class="btn btn-sm btn-outline-light flex-fill">View Class</a>';
-            echo '        <form method="POST" style="margin:0; flex:1;">';
-            echo '          <input type="hidden" name="remove_class_code" value="' . $class_code . '">';
-            echo '          <button type="submit" class="btn btn-sm btn-outline-danger flex-fill">Remove</button>';
-            echo '        </form>';
+            // Check quiz completion for this class
+            $stmtQuizzes = $conn->prepare("
+                SELECT q.id, 
+                    (SELECT 1 FROM student_quizzes sq WHERE sq.quiz_id = q.id AND sq.student_id = ?) AS taken
+                FROM quizzes q
+                WHERE UPPER(q.class_code) = UPPER(?)
+            ");
+            $stmtQuizzes->bind_param("is", $student_id, $class_code);
+            $stmtQuizzes->execute();
+            $quizzes = $stmtQuizzes->get_result();
+
+            $totalQuizzes = $quizzes->num_rows;
+            $completedQuizzes = 0;
+            while ($quiz = $quizzes->fetch_assoc()) {
+                if ($quiz['taken']) $completedQuizzes++;
+            }
+
+            $statusBadge = '';
+            if ($totalQuizzes > 0 && $totalQuizzes === $completedQuizzes) {
+                $statusBadge = '<span class="badge bg-success ms-2">All Completed</span>';
+            } elseif ($completedQuizzes > 0) {
+                $statusBadge = '<span class="badge bg-warning ms-2">Some Completed</span>';
+            }
+
+            echo '<div class="col-12 col-md-6 col-lg-4">';
+            echo '  <a href="student_class.php?class_code=' . urlencode($class_code) . '" class="text-decoration-none">';
+            echo '    <div class="card subject-card mb-3 h-100 shadow-sm">';
+            echo '      <div class="card-body d-flex flex-column">';
+            echo '        <div class="d-flex justify-content-between align-items-start mb-2">';
+            echo '          <h5 class="card-title mb-0 text-truncate">' . $class_title . '</h5>';
+            echo '          <span class="badge bg-dark">' . $class_code . '</span>' . $statusBadge;
+            echo '        </div>';
+            echo '        <p class="card-text small text-light mb-0">Section: ' . $section . '</p>';
+            echo '        <p class="card-text small text-light mb-2">Teacher: ' . $teacher_name . '</p>';
+            echo '        <div class="mt-auto text-end">';
+            echo '          <small class="text-light">Click to view quizzes →</small>';
+            echo '        </div>';
             echo '      </div>';
             echo '    </div>';
-            echo '  </div>';
+            echo '  </a>';
             echo '</div>';
+
+            $stmtQuizzes->close();
         }
     } else {
-        echo '<div class="col-12"><p class="text-muted">No active class codes entered yet.</p></div>';
+        echo '<div class="col-12"><p class="text-muted">No active classes yet.</p></div>';
     }
+
     $stmt->close();
 }
+
 
 // Render completed quizzes
 function renderCompletedQuizzes($conn, $student_id) {
@@ -142,18 +194,17 @@ function renderCompletedQuizzes($conn, $student_id) {
     <script nomodule src="https://cdn.jsdelivr.net/npm/lucide@0.259.0/dist/lucide.js"></script>
     <style>
         .subject-card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            padding: 1.5rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 15px;
+            color: #fff;
         }
-        .subject-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        .subject-card .btn {
+            border-color: #fff;
+            color: #fff;
         }
-        .badge {
-            font-size: 0.75rem;
+        .subject-card .btn:hover {
+            background-color: #fff;
+            color: #000;
         }
     </style>
 </head>
@@ -188,15 +239,15 @@ function renderCompletedQuizzes($conn, $student_id) {
         <input type="text" name="class_code" class="form-control form-control-sm" placeholder="Enter Class Code" required>
         <button type="submit" class="btn btn-primary btn-sm">Add Class</button>
     </form>
-    <?php if (!empty($error)) : ?>
-        <div class="alert alert-danger mb-4"><?php echo $error; ?></div>
-    <?php endif; ?>
+
+    <?php echo $feedback; ?>
 
     <!-- Active Classes -->
     <h2 class="mb-3">Active Classes</h2>
-    <div class="row g-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
         <?php renderClassCards($conn, $student_id); ?>
     </div>
+
 
     <!-- Completed Quizzes -->
     <h2 class="mt-5 mb-3">Completed Quizzes</h2>
