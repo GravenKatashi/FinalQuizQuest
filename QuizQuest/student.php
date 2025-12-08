@@ -9,9 +9,19 @@ $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $student_id = $_SESSION['user_id'] ?? 0;
-$username   = $_SESSION['username'] ?? 'User';
-$role       = $_SESSION['role'] ?? 'student';  // default to student
-$roleDisplay = ucfirst($role);     
+
+// Get full name from database
+$full_name = 'Student'; // default
+if ($student_id) {
+    $stmt = $conn->prepare("SELECT full_name FROM users WHERE id = ?");
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result && $row = $result->fetch_assoc()) {
+        $full_name = $row['full_name'];
+    }
+    $stmt->close();
+}
 
 $feedback = '';
 
@@ -232,7 +242,7 @@ function renderCompletedQuizzes($conn, $student_id) {
 
 <div class="content container mt-4">
     <div class="avatar-container d-flex align-items-center gap-3 mb-4">
-        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($username); ?></span>
+        <span class="greeting h5 mb-0">Hello! <?= htmlspecialchars($full_name) ?></span>
         <img src="https://i.imgur.com/oQEsWSV.png" alt="Avatar" class="freiren-avatar rounded-circle" width="50" height="50">
     </div>
 
