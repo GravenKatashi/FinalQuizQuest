@@ -16,12 +16,12 @@ if (!isset($_GET['class_code'])) {
 
 $class_code = $_GET['class_code'];
 
-// Get class info and teacher
+// Get class info and teacher from classes table
 $stmt = $conn->prepare("
-    SELECT q.title AS quiz_title, u.full_name AS teacher_name
-    FROM quizzes q
-    JOIN users u ON q.teacher_id = u.id
-    WHERE q.class_code = ?
+    SELECT c.title AS class_title, c.section, u.full_name AS teacher_name
+    FROM classes c
+    JOIN users u ON c.teacher_id = u.id
+    WHERE UPPER(c.class_code) = UPPER(?)
     LIMIT 1
 ");
 $stmt->bind_param("s", $class_code);
@@ -34,14 +34,15 @@ if ($class_result->num_rows === 0) {
 
 $class_info = $class_result->fetch_assoc();
 
-// Get all quizzes for this class
+// Get all quizzes for this class along with completion status
 $stmt2 = $conn->prepare("
-    SELECT id, title, created_at
-    FROM quizzes
-    WHERE class_code = ?
-    ORDER BY created_at DESC
+    SELECT q.id, q.title, q.created_at,
+           (SELECT 1 FROM student_quizzes sq WHERE sq.quiz_id = q.id AND sq.student_id = ?) AS taken
+    FROM quizzes q
+    WHERE UPPER(q.class_code) = UPPER(?)
+    ORDER BY q.created_at DESC
 ");
-$stmt2->bind_param("s", $class_code);
+$stmt2->bind_param("is", $student_id, $class_code);
 $stmt2->execute();
 $quizzes = $stmt2->get_result();
 ?>
@@ -50,8 +51,10 @@ $quizzes = $stmt2->get_result();
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Class Details</title>
+    <title>Class Details - <?php echo htmlspecialchars($class_info['class_title']); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/teacher.css">
+
     <style>
         body {
             background-color: #0f172a;
@@ -66,54 +69,59 @@ $quizzes = $stmt2->get_result();
             border-color: #fff;
             color: #fff;
         }
-        .subject-card .btn:hover {
+        .subject-card .btn:hover:not(:disabled) {
             background-color: #fff;
             color: #000;
         }
+        .btn-completed {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            cursor: not-allowed;
+        }
     </style>
 </head>
-
+<div class="container mt-5">
+    <!-- Back to Dashboard Button -->
+    <div class="mb-3">
+        <a href="student.php" class="btn btn-sm btn-outline-light">
+            &larr; Back to Dashboard
+        </a>
+    </div>
 <body>
-
 <div class="container mt-5">
     <div class="mb-4">
-        <h3>Class: <?php echo htmlspecialchars($class_info['quiz_title']); ?></h3>
+        <h3><?php echo htmlspecialchars($class_info['class_title']); ?></h3>
+        <p><strong>Section:</strong> <?php echo htmlspecialchars($class_info['section']); ?></p>
         <p><strong>Teacher:</strong> <?php echo htmlspecialchars($class_info['teacher_name']); ?></p>
         <p><strong>Class Code:</strong> <?php echo htmlspecialchars($class_code); ?></p>
     </div>
 
     <h5 class="mb-3">Available Quizzes</h5>
 
-    <div class="row g-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
         <?php if ($quizzes->num_rows > 0): ?>
             <?php while ($quiz = $quizzes->fetch_assoc()): ?>
-                <div class="col-md-4 col-sm-6">
+                <div class="col">
                     <div class="card subject-card h-100">
                         <div class="card-body d-flex flex-column">
-                            
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title mb-0">
-                                    <?php echo htmlspecialchars($quiz['title']); ?>
-                                </h5>
-                                <span class="badge bg-dark">
-                                    <?php echo htmlspecialchars($class_code); ?>
-                                </span>
+                                <h5 class="card-title mb-0"><?php echo htmlspecialchars($quiz['title']); ?></h5>
+                                <span class="badge bg-dark"><?php echo htmlspecialchars($class_code); ?></span>
                             </div>
-
                             <p class="card-text small text-light mb-3">
-                                Click below to take this quiz.
+                                <?php echo $quiz['taken'] ? 'You have completed this quiz.' : 'Click below to take this quiz.'; ?>
                             </p>
-
                             <div class="mt-auto">
-                                <a href="start_quiz.php?quiz_id=<?php echo $quiz['id']; ?>" 
-                                   class="btn btn-sm btn-outline-light w-100">
-                                    Take Quiz
-                                </a>
+                                <?php if ($quiz['taken']): ?>
+                                    <button class="btn btn-sm btn-completed w-100" disabled>Completed</button>
+                                <?php else: ?>
+                                    <a href="start_quiz.php?quiz_id=<?php echo $quiz['id']; ?>" 
+                                       class="btn btn-sm btn-outline-light w-100">Take Quiz</a>
+                                <?php endif; ?>
                                 <div class="text-end mt-2">
                                     <small>Created: <?php echo date('M d, Y', strtotime($quiz['created_at'])); ?></small>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -124,7 +132,13 @@ $quizzes = $stmt2->get_result();
     </div>
 </div>
 
+
+
 </body>
 </html>
 
-<?php $conn->close(); ?>
+<?php
+$stmt->close();
+$stmt2->close();
+$conn->close();
+?>
