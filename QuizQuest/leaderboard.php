@@ -16,15 +16,13 @@ $user_id = (int) $_SESSION['user_id'];
 $username = $_SESSION['username'] ?? 'User';
 
 /*
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 | FETCH CLASSES BASED ON ROLE
-|--------------------------------------------------------------------------
-| IMPORTANT:
-| - BOTH queries return a compatible structure
-| - Leaderboard selector ONLY (no heavy analytics)
+|----------------------------------------------------------------------
+| - Teacher: All classes they created + count of students participated
+| - Student: All classes they joined + count of quizzes taken
 */
 if ($role === "teacher") {
-
     $stmt = $mysqli->prepare("
         SELECT 
             c.id AS class_id,
@@ -37,12 +35,12 @@ if ($role === "teacher") {
         LEFT JOIN quizzes q ON q.class_code = c.class_code
         LEFT JOIN student_quizzes sq ON sq.quiz_id = q.id
         WHERE c.teacher_id = ?
-        GROUP BY c.id
+        GROUP BY c.id, c.title, c.section, c.class_code, c.created_at
         ORDER BY c.created_at DESC
     ");
     $stmt->bind_param("i", $user_id);
 
-} else { // ✅ STUDENT — SHOW JOINED CLASSES + QUIZ CLASSES (EVEN 0 QUIZZES)
+} else { // Student
     $stmt = $mysqli->prepare("
         SELECT 
             c.id AS class_id,
@@ -68,7 +66,6 @@ $classes = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 $mysqli->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,7 +76,6 @@ $mysqli->close();
 <link rel="stylesheet" href="assets/css/teacher.css">
 <link rel="stylesheet" href="leaderboard.css">
 </head>
-
 <body>
 
 <canvas id="background-canvas"></canvas>
@@ -133,14 +129,11 @@ $mysqli->close();
                 <div class="col-md-4 col-sm-6">
                     <div class="card subject-card h-100 leaderboard-card"
                          onclick="openLeaderboard(<?= (int)$class['class_id'] ?>)">
-
                         <div class="card-body d-flex flex-column">
-
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h5 class="card-title mb-0">
                                     <?= htmlspecialchars($class['class_title']) ?>
                                 </h5>
-
                                 <span class="badge class-code-badge">
                                     Code: <?= htmlspecialchars($class['class_code']) ?>
                                 </span>
@@ -162,7 +155,6 @@ $mysqli->close();
                                     Created: <?= date('M d, Y', strtotime($class['created_at'])) ?>
                                 </small>
                             </div>
-
                         </div>
                     </div>
                 </div>
