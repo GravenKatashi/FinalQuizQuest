@@ -91,8 +91,10 @@ $stmt->close();
 
 <div class="content">
     <div class="avatar-container">
-        <span class="greeting">Hello! <?=htmlspecialchars($username)?></span>
-        <img src="https://i.imgur.com/oQEsWSV.png" alt="avatar" class="freiren-avatar">
+        <span class="greeting">
+            Hello <?= htmlspecialchars($username) ?>
+        </span>
+        <img src="https://i.imgur.com/oQEsWSV.png" class="freiren-avatar" alt="avatar">
     </div>
 
     <h2 class="quizzes-title mb-4">Your Classes</h2>
