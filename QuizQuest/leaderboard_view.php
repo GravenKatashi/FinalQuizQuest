@@ -104,8 +104,7 @@ $conn->close();
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="profile.php">Profile</a>
-            <a class="nav-item active" href="leaderboard.php">Leaderboard</a>
+            <a class="nav-item active" href="leaderboard.php">Back to Leaderboards</a>
         </div>
     </div>
     <a class="logout" href="logout.php">Logout</a>
@@ -123,11 +122,6 @@ $conn->close();
                         Section: <?php echo htmlspecialchars($class['section']); ?> • 
                         Code: <?php echo htmlspecialchars($class_code); ?>
                     </small>
-                </div>
-                <div>
-                    <a href="leaderboard.php" class="btn btn-outline-secondary">
-                        ← Back to Leaderboards
-                    </a>
                 </div>
             </div>
 
