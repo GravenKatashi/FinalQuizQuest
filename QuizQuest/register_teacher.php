@@ -15,18 +15,24 @@ $shakeClass = ""; // CSS class for shake animation
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 
+    // ---------- Adjusted variables to match users table ----------
     $username = trim($_POST["username"] ?? "");
     $full_name = trim($_POST["full_name"] ?? "");
     $email = trim($_POST["email"] ?? "");
     $school_affiliation = trim($_POST["school_affiliation"] ?? "");
     $password = trim($_POST["password"] ?? "");
     $confirm_password = trim($_POST["confirm_password"] ?? "");
-    $role = "teacher";
+    $role = "teacher"; // fixed role for this form
+    // -------------------------------------------------------------
 
     if (empty($username) || empty($full_name) || empty($email) || empty($school_affiliation) || empty($password) || empty($confirm_password)) {
         $error = "All fields are required.";
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "Invalid email format.";
+    } elseif (strlen($password) < 8) {
+        $error = "Password must be at least 8 characters.";
     } else {
         // Check username
         $stmt = $conn->prepare("SELECT id FROM users WHERE username=? LIMIT 1");
@@ -42,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
             if ($stmt->get_result()->num_rows > 0) {
                 $error = "Email already registered.";
             } else {
-                // Insert teacher
+                // Insert teacher with school_affiliation
                 $hashed = password_hash($password, PASSWORD_DEFAULT);
                 $stmt = $conn->prepare(
                     "INSERT INTO users (username, full_name, email, password, role, school_affiliation) 
@@ -50,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
                 );
                 $stmt->bind_param("ssssss", $username, $full_name, $email, $hashed, $role, $school_affiliation);
                 if ($stmt->execute()) {
-                    $success = "Registration successful!";
+                    $success = true; // <-- Flag for popup
                 } else {
                     $error = "Error creating account. Try again.";
                 }
@@ -65,14 +71,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QuizQuest Teacher Register</title>
+    <title>QuizQuest Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/register_teacher.css">
 </head>
 
 <body>
 <canvas id="background-canvas"></canvas>
-
 <header class="header">
     <div class="logo-container">
         <img src="assets/images/logo.png" alt="QuizQuest Logo">
@@ -82,21 +87,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 <div class="container mt-3">
     <div class="register-card">
 
+        <!-- LEFT SIDE -->
+        <div class="left-side">
+            <div class="patch-notes">
+                <h2>Patch Notes</h2>
+                <div class="patch-list">
+                    <div class="patch-entry">
+                        <h3>v1.0.3 – Nov 30, 2025</h3>
+                        <p>• Improved login error animation.</p>
+                        <p>• Updated spacing and layout adjustments.</p>
+                    </div>
+                    <div class="patch-entry">
+                        <h3>v1.0.2 – Nov 28, 2025</h3>
+                        <p>• Added new title image on login page.</p>
+                        <p>• Updated UI colors.</p>
+                    </div>
+                    <div class="patch-entry">
+                        <h3>v1.0.1 – Nov 25, 2025</h3>
+                        <p>• Initial login screen layout created.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-info">
+                <div class="side-line"></div>
+                <p>
+                    Enter QuizQuest, where every quiz brings you closer to mastery.
+                    Play, learn, and rise through the ranks.
+                </p>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE -->
         <div class="right-side">
 
             <div class="title">
                 <img src="assets/images/quizquest-title.png">
             </div>
-            <p class="subheading">Become a Teacher!</p>
+            <p class="subheading">Where every quiz is an adventure!</p>
 
             <form method="POST">
                 <input type="text" name="username" class="form-control form-control-sm mb-2" placeholder="Username" required>
                 <input type="text" name="full_name" class="form-control form-control-sm mb-2" placeholder="Full Name" required>
+
                 <input type="text" name="email" id="email" class="form-control form-control-sm mb-2" placeholder="Email" required>
                 <div id="emailMsg" class="validation-message"></div>
+
                 <input type="text" name="school_affiliation" class="form-control form-control-sm mb-2" placeholder="School Affiliation" required>
+
                 <input type="password" name="password" id="password" class="form-control form-control-sm mb-2" placeholder="Password" required>
                 <div id="passwordMsg" class="validation-message">Minimum 8 characters</div>
+
                 <input type="password" name="confirm_password" class="form-control form-control-sm mb-2" placeholder="Confirm Password" required>
 
                 <div class="register-footer">
@@ -123,15 +164,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 </div>
 
 <?php if ($success): ?>
+<!-- Success Popup -->
 <div class="popup-overlay">
     <div class="popup-content">
-        <h3><?= $success ?></h3>
+        <h3>You have successfully registered in becoming a teacher!</h3>
         <a href="login.php" class="popup-btn">Continue to login</a>
     </div>
 </div>
 <?php endif; ?>
 
-<script src="registerscripts.js"></script>
+<script src="teacherscripts.js"></script>
+<script src="registerscripts.js"></script> <!-- Our new JS for email/password validation -->
 </body>
 </html>
 

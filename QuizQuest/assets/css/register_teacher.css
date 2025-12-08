@@ -265,12 +265,12 @@ body {
     color: #fff;
 }
 
-.form-control.invalid {
-    border-color: red;
+.invalid {
+    border: 2px solid red !important;
 }
 
 .validation-message {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: red;
-    margin-top: 2px;
+    margin-bottom: 0.5rem;
 }

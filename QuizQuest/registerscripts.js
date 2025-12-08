@@ -1,19 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
     const emailInput = document.getElementById("email");
-    const emailMsg = document.getElementById("emailMsg");
     const passwordInput = document.getElementById("password");
+    const emailMsg = document.getElementById("emailMsg");
     const passwordMsg = document.getElementById("passwordMsg");
     const form = document.querySelector("form");
 
     function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
     emailInput.addEventListener("input", () => {
         if (!validateEmail(emailInput.value)) {
             emailInput.classList.add("invalid");
-            emailMsg.textContent = "Invalid email address";
+            emailMsg.textContent = "Invalid email format";
         } else {
             emailInput.classList.remove("invalid");
             emailMsg.textContent = "";
@@ -23,18 +22,21 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.addEventListener("input", () => {
         if (passwordInput.value.length < 8) {
             passwordInput.classList.add("invalid");
-            passwordMsg.style.display = "block";
+            passwordMsg.textContent = "Minimum 8 characters required";
         } else {
             passwordInput.classList.remove("invalid");
-            passwordMsg.style.display = "none";
+            passwordMsg.textContent = "";
         }
     });
 
     form.addEventListener("submit", (e) => {
-        if (!validateEmail(emailInput.value) || passwordInput.value.length < 8) {
-            e.preventDefault();
-            emailInput.classList.add("invalid");
-            passwordInput.classList.add("invalid");
+        let valid = true;
+        if (!validateEmail(emailInput.value)) valid = false;
+        if (passwordInput.value.length < 8) valid = false;
+
+        if (!valid) {
+            e.preventDefault(); // Prevent submission
+            emailInput.focus();
         }
     });
 });
