@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
     <title>Forgot Password - QuizQuest</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="assets/css/login.css">
+    <link rel="stylesheet" href="assets/css/forgot_password.css">
 </head>
 <body>
 <canvas id="background-canvas"></canvas>
@@ -88,12 +88,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
 
         <!-- LEFT SIDE -->
         <div class="left-side">
-            <div class="patch-notes">
-                <h2> Forgot Password </h2>
-                <div class="bottom-info">
-                    <div class="side-line"></div>
-                    <p>Enter your registered email and we'll send you a reset link.</p>
-                </div>
+            <h2> Forgot Password </h2>
+            <div class="bottom-info">
+                <div class="side-line"></div>
+                <p>Enter your registered email and we'll send you a reset link.</p>
             </div>
         </div>
 
@@ -115,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
                 <input type="email" name="email" class="form-control form-control-sm mb-2" placeholder="Enter your email" required>
 
                 <div class="login-footer">
-                    <a href="login.php" class="btn-link" style="align-self:center;">Back to Login</a>
+                    <button type="button" onclick="window.location.href='login.php'" class="btn btn-secondary">Back to Login</button>
                     <button type="submit" name="reset_request">Send Reset Link</button>
                 </div>
             </form>
