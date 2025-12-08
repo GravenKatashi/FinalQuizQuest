@@ -218,7 +218,7 @@ function renderCompletedQuizzes($conn, $student_id) {
                 <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($student_name); ?>)
             </a>
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='student.php'){echo 'active';} ?>" href="student.php">
-                <i data-lucide="layout"></i> Quizzes
+                <i data-lucide="layout"></i> Classes
             </a>
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='leaderboard.php'){echo 'active';} ?>" href="leaderboard.php">
                 <i data-lucide="award"></i> Leaderboard
