@@ -1,8 +1,9 @@
+
 // ===== Canvas Background =====
 const canvas = document.getElementById('background-canvas');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.height = document.body.scrollHeight;
 
 let particles = [];
 for (let i = 0; i < 250; i++) {
@@ -34,7 +35,7 @@ animateParticles();
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.height = document.body.scrollHeight;
 });
 
 
@@ -148,3 +149,63 @@ if(tabParam && document.querySelector(`.sidebar-tab[data-tab="${tabParam}"]`)) {
         }, 200);
     }
 }
+
+// Delete class confirmation
+function deleteClass(id){
+    // create modal element if not exists
+    let modalEl = document.getElementById('deleteClassModal');
+    if(!modalEl){
+        modalEl = document.createElement('div');
+        modalEl.id = 'deleteClassModal';
+        modalEl.className = 'modal fade';
+        modalEl.tabIndex = -1;
+        modalEl.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Class</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this class?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(modalEl);
+    }
+
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    const confirmBtn = modalEl.querySelector('#confirmDeleteBtn');
+    confirmBtn.onclick = () => {
+        // AJAX delete request or form submit
+        fetch(`delete_class.php?id=${id}`, { method:'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                location.reload();
+            } else {
+                alert('Failed to delete class');
+            }
+        });
+        modal.hide(); // properly hide using Bootstrap API
+    };
+
+    // optional: remove modal from DOM after hidden
+    modalEl.addEventListener('hidden.bs.modal', () => {
+        modalEl.remove();
+    }, { once:true });
+}
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = document.body.scrollHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+

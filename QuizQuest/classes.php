@@ -6,43 +6,44 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$mysqli = new mysqli("localhost", "root", "", "quizmaker");
-if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error);
-}
+$mysqli = new mysqli("localhost","root","","quizmaker");
+if ($mysqli->connect_error) die("Connection failed: ".$mysqli->connect_error);
 
-$user_id = (int)($_SESSION['user_id']);
-$role = $_SESSION['role'] ?? 'student';
+$user_id = (int)$_SESSION['user_id'];
+$username = $_SESSION['username'] ?? 'User';
+$role = $_SESSION['role'];
 
-// Fetch full name from database
-$full_name = 'User';
-$stmtName = $mysqli->prepare("SELECT full_name FROM users WHERE id = ?");
-$stmtName->bind_param("i", $user_id);
-$stmtName->execute();
-$resultName = $stmtName->get_result();
-if ($resultName && $rowName = $resultName->fetch_assoc()) {
-    $full_name = $rowName['full_name'];
-}
-$stmtName->close();
-
-if ($role === 'teacher' && $_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['title']) && !empty($_POST['section'])) {
+// --------------------
+// HANDLE CREATE CLASS
+// --------------------
+if ($role === 'teacher' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'], $_POST['section'])) {
     $title = trim($_POST['title']);
     $section = trim($_POST['section']);
-    
-    // Generate a unique class code, e.g., 6 uppercase letters
-    $class_code = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+    $class_code = strtoupper(substr(bin2hex(random_bytes(4)), 0, 7));
 
-    $stmtInsert = $mysqli->prepare("INSERT INTO classes (title, section, class_code, teacher_id, created_at) VALUES (?, ?, ?, ?, NOW())");
-    $stmtInsert->bind_param("sssi", $title, $section, $class_code, $user_id);
-    $stmtInsert->execute();
-    $stmtInsert->close();
-
-    // Redirect to refresh page and show new class
-    header("Location: classes.php");
-    exit;
+    $stmt = $mysqli->prepare("INSERT INTO classes (teacher_id, title, section, class_code) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $user_id, $title, $section, $class_code);
+    if ($stmt->execute()) {
+        header("Location: classes.php");
+        exit;
+    } else {
+        $error = "Failed to create class. Please try again.";
+    }
+    $stmt->close();
 }
 
-// Fetch classes based on role
+// --------------------
+// HANDLE DELETE CLASS
+// --------------------
+if ($role === 'teacher' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_class_id'])) {
+    $delete_class_id = (int)$_POST['delete_class_id'];
+    $stmt = $mysqli->prepare("DELETE FROM classes WHERE id = ? AND teacher_id = ?");
+    $stmt->bind_param("ii", $delete_class_id, $user_id);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Fetch classes
 if ($role === 'teacher') {
     $stmt = $mysqli->prepare("SELECT id, title, section, class_code, created_at FROM classes WHERE teacher_id = ? ORDER BY created_at DESC");
     $stmt->bind_param("i", $user_id);
@@ -68,6 +69,11 @@ $stmt->close();
 <title>Classes - QuizQuest</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/teacher.css">
+<style>
+/* Compact CSS for Delete Button */
+.delete-class-btn{position:absolute;top:8px;right:12px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:18px;font-weight:bold;cursor:pointer;transition:all 0.3s;z-index:10;}
+.delete-class-btn:hover{background:rgba(255,0,0,0.8);transform:scale(1.1);}
+</style>
 </head>
 <body>
 <canvas id="background-canvas"></canvas>
@@ -76,54 +82,48 @@ $stmt->close();
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item <?= basename($_SERVER['PHP_SELF'])=='profile.php'?'active':'' ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($full_name) ?>)
-            </a>
-            <a class="nav-item <?= basename($_SERVER['PHP_SELF'])=='classes.php'?'active':'' ?>" href="<?= $role === 'teacher' ? 'teacher.php' : 'classes.php' ?>">
-                <i data-lucide="layout"></i> Classes
-            </a>
-            <a class="nav-item <?= basename($_SERVER['PHP_SELF'])=='leaderboard.php'?'active':'' ?>" href="leaderboard.php">
-                <i data-lucide="award"></i> Leaderboard
-            </a>
+            <a class="nav-item" href="profile.php"><i data-lucide="user"></i> Profile (<?=htmlspecialchars($username)?>)</a>
+            <a class="nav-item active" href="classes.php"><i data-lucide="layout"></i> Classes</a>
+            <a class="nav-item" href="leaderboard.php"><i data-lucide="award"></i> Leaderboard</a>
         </div>
     </div>
     <a class="logout" href="logout.php"><i data-lucide="log-out"></i> Logout</a>
 </div>
 
-<div class="content container mt-4">
-    <div class="avatar-container d-flex align-items-center gap-3 mb-4">
-        <span class="greeting h5 mb-0">Hello! <?= htmlspecialchars($full_name) ?></span>
-        <img src="https://i.imgur.com/oQEsWSV.png" alt="Avatar" class="freiren-avatar rounded-circle" width="50" height="50">
+<div class="content">
+    <div class="avatar-container">
+        <span class="greeting">Hello! <?=htmlspecialchars($username)?></span>
+        <img src="https://i.imgur.com/oQEsWSV.png" alt="avatar" class="freiren-avatar">
     </div>
 
     <h2 class="quizzes-title mb-4">Your Classes</h2>
 
     <div class="row g-4">
-        <?php if($role === 'teacher'): ?>
-            <!-- Create class card for teacher -->
-            <div class="col-md-4 col-sm-6">
-                <div class="card subject-card h-100 d-flex align-items-center justify-content-center" style="cursor:pointer; background:linear-gradient(135deg,#2563EB,#3B82F6);" data-bs-toggle="modal" data-bs-target="#createClassModal">
-                    <h3 class="card-title text-center">+ Create Class</h3>
-                </div>
+        <?php if($role==='teacher'): ?>
+        <div class="col-md-4 col-sm-6">
+            <div class="card subject-card h-100 d-flex align-items-center justify-content-center" style="cursor:pointer; background:linear-gradient(135deg,#2563EB,#3B82F6);" data-bs-toggle="modal" data-bs-target="#createClassModal">
+                <h3 class="card-title text-center">+ Create Class</h3>
             </div>
+        </div>
         <?php endif; ?>
 
         <?php if(!empty($classes)): ?>
             <?php foreach($classes as $class): ?>
-                <div class="col-md-4 col-sm-6">
-                    <div class="card subject-card h-100" style="background: linear-gradient(135deg,#0ea5e9,#0284c7);" onclick="enterClass(<?= (int)$class['id'] ?>)">
-                        <div class="card-body d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title mb-0"><?= htmlspecialchars($class['title']) ?></h5>
-                                <span class="badge" style="background:rgba(255,255,255,0.15);color:#fff;">Code: <?= htmlspecialchars($class['class_code']) ?></span>
-                            </div>
-                            <p class="card-text small mb-1">Section: <?= htmlspecialchars($class['section']) ?></p>
-                            <div class="mt-auto text-end">
-                                <small class="text-muted">Created: <?= date('M d, Y', strtotime($class['created_at'])) ?></small>
-                            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="card subject-card h-100 position-relative" onclick="enterClass(<?= (int)$class['id'] ?>)">
+                    <button class="delete-class-btn" data-class-id="<?= (int)$class['id'] ?>" title="Delete Class">&times;</button>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1"><?=htmlspecialchars($class['title'])?></h5>
+                        <p class="card-text small mb-1 d-flex justify-content-between align-items-center">
+                           <span>Section: <?=htmlspecialchars($class['section'])?></span>
+                           <span class="badge" style="background:rgba(255,255,255,0.15);color:#fff;">Code: <?=htmlspecialchars($class['class_code'])?></span>
+                        </p>
+                        <div class="mt-auto text-end">
+                            <small class="text-muted">Created: <?=date('M d, Y', strtotime($class['created_at']))?></small>
                         </div>
                     </div>
                 </div>
+            </div>
             <?php endforeach; ?>
         <?php else: ?>
             <div class="col-12"><p class="text-muted">No classes found.</p></div>
@@ -131,8 +131,8 @@ $stmt->close();
     </div>
 </div>
 
-<?php if($role === 'teacher'): ?>
 <!-- Create Class Modal -->
+<?php if($role==='teacher'): ?>
 <div class="modal fade" id="createClassModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form method="POST" class="modal-content">
@@ -158,20 +158,51 @@ $stmt->close();
 </div>
 <?php endif; ?>
 
+<!-- Delete Class Confirmation Modal -->
+<div class="modal fade" id="deleteClassModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" class="modal-content">
+      <input type="hidden" name="delete_class_id" id="deleteClassIdInput">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Class</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this class? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.259.0/dist/lucide.js"></script>
+<script src="teacherscripts.js"></script>
 <script>
 function enterClass(classId){
-    <?php if($role === 'teacher'): ?>
-        window.location.href = `teacher.php?class_id=${classId}`;
+    <?php if($role==='teacher'): ?>
+    window.location.href = `teacher.php?class_id=${classId}`;
     <?php else: ?>
-        window.location.href = `student_class.php?class_id=${classId}`;
+    window.location.href = `student_class.php?class_id=${classId}`;
     <?php endif; ?>
 }
+
+// Delete class confirmation
+document.querySelectorAll('.delete-class-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const classId = btn.dataset.classId;
+        document.getElementById('deleteClassIdInput').value = classId;
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteClassModal'));
+        deleteModal.show();
+    });
+});
+
 lucide.replace();
 </script>
-<script src="teacherscripts.js"></script>
 </body>
 </html>
-
 <?php $mysqli->close(); ?>

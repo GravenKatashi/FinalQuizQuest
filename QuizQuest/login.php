@@ -38,8 +38,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
                 exit;
             }
 
+            // ✅ NEW: Admin redirect
             if ($user["role"] === "admin") {
-                header("Location: admin_users.php");  // <-- new admin dashboard
+                header("Location: admin_users.php");
                 exit;
             }
 

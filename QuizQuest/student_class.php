@@ -18,7 +18,7 @@ $class_code = $_GET['class_code'];
 
 // Get class info and teacher from classes table
 $stmt = $conn->prepare("
-    SELECT c.title AS class_title, c.section, u.full_name AS teacher_name
+    SELECT c.id AS class_id, c.title AS class_title, c.section, u.full_name AS teacher_name
     FROM classes c
     JOIN users u ON c.teacher_id = u.id
     WHERE UPPER(c.class_code) = UPPER(?)
@@ -33,6 +33,7 @@ if ($class_result->num_rows === 0) {
 }
 
 $class_info = $class_result->fetch_assoc();
+$class_id = $class_info['class_id'];
 
 // Get all quizzes for this class along with completion status
 $stmt2 = $conn->prepare("
@@ -54,49 +55,43 @@ $quizzes = $stmt2->get_result();
     <title>Class Details - <?php echo htmlspecialchars($class_info['class_title']); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/teacher.css">
-
-    <style>
-        body {
-            background-color: #0f172a;
-            color: #fff;
-        }
-        .subject-card {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            border-radius: 15px;
-            color: #fff;
-        }
-        .subject-card .btn {
-            border-color: #fff;
-            color: #fff;
-        }
-        .subject-card .btn:hover:not(:disabled) {
-            background-color: #fff;
-            color: #000;
-        }
-        .btn-completed {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            cursor: not-allowed;
-        }
-    </style>
 </head>
-<div class="container mt-5">
-    <!-- Back to Dashboard Button -->
-    <div class="mb-3">
-        <a href="student.php" class="btn btn-sm btn-outline-light">
-            &larr; Back to Dashboard
-        </a>
-    </div>
 <body>
-<div class="container mt-5">
-    <div class="mb-4">
-        <h3><?php echo htmlspecialchars($class_info['class_title']); ?></h3>
-        <p><strong>Section:</strong> <?php echo htmlspecialchars($class_info['section']); ?></p>
-        <p><strong>Teacher:</strong> <?php echo htmlspecialchars($class_info['teacher_name']); ?></p>
-        <p><strong>Class Code:</strong> <?php echo htmlspecialchars($class_code); ?></p>
+<canvas id="background-canvas"></canvas>
+
+<div class="sidebar">
+    <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest Logo">
+    <div class="menu-wrapper">
+        <div class="nav">
+            <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
+                <i data-lucide="user"></i> Profile
+            </a>
+            <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='student.php'){echo 'active';} ?>" href="student.php">
+                <i data-lucide="layout"></i> Classes
+            </a>
+            <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='leaderboard.php'){echo 'active';} ?>" href="leaderboard.php">
+                <i data-lucide="award"></i> Leaderboard
+            </a>
+        </div>
+    </div>
+    <a class="logout" href="logout.php"><i data-lucide="log-out"></i> Logout</a>
+</div>
+
+<div class="content container mt-4">
+    <!-- Greeting Box / Class Header -->
+    <div class="greeting-box d-flex justify-content-between align-items-center">
+        <div class="greeting-text">
+            <small>Class</small>
+            <h2><?php echo htmlspecialchars($class_info['class_title']); ?></h2>
+            <div class="greeting-box-line"></div>
+            <p>Section: <?php echo htmlspecialchars($class_info['section']); ?> — Code: <strong><?php echo htmlspecialchars($class_code); ?></strong></p>
+        </div>
+        <div class="greeting-buttons d-flex gap-2">
+            <a href="student.php" class="btn btn-sm btn-outline-light">&larr; Back to Dashboard</a>
+        </div>
     </div>
 
-    <h5 class="mb-3">Available Quizzes</h5>
+    <h5 class="mt-4 mb-3">Available Quizzes</h5>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
         <?php if ($quizzes->num_rows > 0): ?>
@@ -132,8 +127,11 @@ $quizzes = $stmt2->get_result();
     </div>
 </div>
 
-
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="teacherscripts.js"></script>
+<script>
+    lucide.replace();
+</script>
 </body>
 </html>
 
