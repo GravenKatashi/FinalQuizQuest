@@ -1,28 +1,109 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
-$user_id = $_SESSION['user_id']; $username = $_SESSION['user']; $role = $_SESSION['role'];
-$conn = new mysqli("localhost","root","","quizmaker"); if($conn->connect_error){die("Connection failed: ".$conn->connect_error);}
-$info_error = ""; $info_success = "";
-$user_sql = "SELECT id, username, role, full_name, email, created_at, profile_image FROM users WHERE id=?"; $stmt = $conn->prepare($user_sql); $stmt->bind_param("i",$user_id); $stmt->execute(); $user_result = $stmt->get_result();
-if($user_result->num_rows!==1){session_destroy();header("Location: login.php");exit;}
-$user_data = $user_result->fetch_assoc(); $current_full_name = $user_data['full_name']; $current_email = $user_data['email']; $current_role = $user_data['role']; $created_at = $user_data['created_at']; $current_image = $user_data['profile_image'] ?: 'https://i.imgur.com/oQEsWSV.png';
-$incomplete_info = empty($current_full_name) || empty($current_email);
-if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['update_profile'])){
-    $full_name = $_POST['full_name']; $email = $_POST['email']; $upload_dir = "assets/uploads/"; $profile_image = $current_image;
-    if(!empty($_FILES['profile_image']['name'])){
-        $file_ext = strtolower(pathinfo($_FILES['profile_image']['name'],PATHINFO_EXTENSION));
-        $allowed = ['jpg','jpeg','png','gif'];
-        if(in_array($file_ext,$allowed)){
-            $new_name = uniqid().'.'.$file_ext;
-            if(move_uploaded_file($_FILES['profile_image']['tmp_name'],$upload_dir.$new_name)){ $profile_image=$upload_dir.$new_name; }else{ $info_error="Failed to upload image."; }
-        }else{ $info_error="Invalid image type. Only jpg, jpeg, png, gif allowed."; }
-    }
-    if(!$info_error){
-        $update_sql = "UPDATE users SET full_name=?, email=?, profile_image=? WHERE id=?"; $stmt=$conn->prepare($update_sql); $stmt->bind_param("sssi",$full_name,$email,$profile_image,$user_id);
-        if($stmt->execute()){ $info_success="Profile updated successfully."; $current_full_name=$full_name; $current_email=$email; $current_image=$profile_image; $incomplete_info=empty($current_full_name) || empty($current_email); }else{ $info_error="Failed to update profile."; }
-    }
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
 }
+
+$user_id  = (int)($_SESSION['user_id']);
+$username = $_SESSION['username'] ?? 'User';
+$role     = $_SESSION['role'] ?? 'student';
+
+$conn = new mysqli("localhost", "root", "", "quizmaker");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$info_error = "";
+$info_success = "";
+
+// Fetch user (use prepared statement)
+$user_sql = "SELECT id, username, role, full_name, email, created_at, profile_image FROM users WHERE id = ?";
+$stmt = $conn->prepare($user_sql);
+if ($stmt === false) {
+    die("Prepare failed: " . $conn->error);
+}
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user_result = $stmt->get_result();
+
+if (! $user_result || $user_result->num_rows !== 1) {
+    // if user not found, force logout
+    session_destroy();
+    header("Location: login.php");
+    exit;
+}
+
+$user_data = $user_result->fetch_assoc();
+$current_full_name = $user_data['full_name'] ?? '';
+$current_email     = $user_data['email'] ?? '';
+$current_role      = $user_data['role'] ?? $role;
+$created_at        = $user_data['created_at'] ?? '';
+$current_image     = $user_data['profile_image'] ?: 'https://i.imgur.com/oQEsWSV.png';
+
+$incomplete_info = empty(trim($current_full_name)) || empty(trim($current_email));
+
+// Handle profile update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
+
+    $full_name = trim($_POST['full_name'] ?? $current_full_name);
+    $email     = trim($_POST['email'] ?? $current_email);
+
+    // image handling
+    $upload_dir = __DIR__ . '/assets/uploads/';
+    if (!is_dir($upload_dir)) {
+        @mkdir($upload_dir, 0755, true);
+    }
+
+    $profile_image = $current_image; // default keep existing
+
+    if (!empty($_FILES['profile_image']['name'])) {
+        $file_name = $_FILES['profile_image']['name'];
+        $tmp_name  = $_FILES['profile_image']['tmp_name'];
+        $file_ext  = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+        $allowed   = ['jpg', 'jpeg', 'png', 'gif'];
+
+        if (!in_array($file_ext, $allowed, true)) {
+            $info_error = "Invalid image type. Only jpg, jpeg, png, gif allowed.";
+        } else {
+            $new_name = uniqid('prof_', true) . "." . $file_ext;
+            $dest = $upload_dir . $new_name;
+            if (move_uploaded_file($tmp_name, $dest)) {
+                // store path relative to project root for DB
+                $profile_image = 'assets/uploads/' . $new_name;
+            } else {
+                $info_error = "Failed to upload image.";
+            }
+        }
+    }
+
+    // Only update if no upload error
+    if (empty($info_error)) {
+        $update_sql = "UPDATE users SET full_name = ?, email = ?, profile_image = ? WHERE id = ?";
+        $ustmt = $conn->prepare($update_sql);
+        if ($ustmt === false) {
+            $info_error = "Prepare failed: " . $conn->error;
+        } else {
+            $ustmt->bind_param("sssi", $full_name, $email, $profile_image, $user_id);
+            if ($ustmt->execute()) {
+                $info_success = "Profile updated successfully.";
+                $current_full_name = $full_name;
+                $current_email = $email;
+                $current_image = $profile_image;
+                $incomplete_info = empty(trim($current_full_name)) || empty(trim($current_email));
+            } else {
+                $info_error = "Failed to update profile.";
+            }
+            $ustmt->close();
+        }
+    }
+    // prevent resubmission on refresh
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+$stmt->close();
 ?>
 <!DOCTYPE html>
 <html>
@@ -65,13 +146,17 @@ if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['update_profile'])){
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
                 <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($username); ?>)
             </a>
-            <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='classes.php'){echo 'active';} ?>" href="classes.php">
-                <i data-lucide="layout"></i> Classes
-            </a>
-            </a>
-            <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='index.php'){echo 'active';} ?>" href="quizmaker/index.php">
-                <i data-lucide="edit-3"></i> Quizmaker
-            </a>
+
+            <?php if ($role === "teacher"): ?>
+                <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='classes.php'){echo 'active';} ?>" href="classes.php">
+                    <i data-lucide="layout"></i> Classes
+                </a>
+            <?php else: ?>
+                <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='student.php'){echo 'active';} ?>" href="student.php">
+                    <i data-lucide="file-text"></i> Quizzes
+                </a>
+            <?php endif; ?>
+
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='leaderboard.php'){echo 'active';} ?>" href="leaderboard.php">
                 <i data-lucide="award"></i> Leaderboard
             </a>
@@ -86,7 +171,7 @@ if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['update_profile'])){
 
 <div class="content">
 <div class="greeting-box">
-    <img src="<?php echo htmlspecialchars($current_image); ?>" class="greeting-img">
+    <img src="<?php echo htmlspecialchars($current_image); ?>" class="greeting-img" alt="Profile">
     <div class="greeting-text">
         <small>S.Y. 2025-2026 - 1st Semester</small>
         <div class="greeting-box-line"></div>
@@ -94,23 +179,25 @@ if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['update_profile'])){
         <?php if($incomplete_info): ?><small>Please update your profile if any information is still blank.</small><?php endif; ?>
     </div>
 </div>
+
 <div class="profile-card" id="profileView">
-    <?php if($info_error): ?><div class="alert alert-danger py-2"><?php echo $info_error; ?></div><?php endif; ?>
-    <?php if($info_success): ?><div class="alert alert-success py-2"><?php echo $info_success; ?></div><?php endif; ?>
+    <?php if(!empty($info_error)): ?><div class="alert alert-danger py-2"><?php echo $info_error; ?></div><?php endif; ?>
+    <?php if(!empty($info_success)): ?><div class="alert alert-success py-2"><?php echo $info_success; ?></div><?php endif; ?>
     <div class="single-profile-card">
         <div class="profile-row"><dt>Username</dt><dd><?php echo htmlspecialchars($username); ?></dd></div>
         <div class="profile-row"><dt>Full Name</dt><dd><?php echo htmlspecialchars($current_full_name); ?></dd></div>
         <div class="profile-row"><dt>Email</dt><dd><?php echo htmlspecialchars($current_email); ?></dd></div>
-        <div class="profile-row"><dt>Role</dt><dd><?php echo ucfirst($current_role); ?></dd></div>
-        <div class="profile-row"><dt>Member Since</dt><dd><?php echo date('M d, Y', strtotime($created_at)); ?></dd></div>
+        <div class="profile-row"><dt>Role</dt><dd><?php echo ucfirst(htmlspecialchars($current_role)); ?></dd></div>
+        <div class="profile-row"><dt>Member Since</dt><dd><?php echo $created_at ? date('M d, Y', strtotime($created_at)) : '-'; ?></dd></div>
         <div class="text-center mt-4"><button class="btn btn-primary btn-lg" id="editProfileBtn">Update Profile</button></div>
     </div>
 </div>
+
 <div class="profile-card" id="profileEdit">
     <h4 class="mb-4 text-center">Edit Profile</h4>
     <form method="POST" enctype="multipart/form-data">
         <div class="text-center mb-4">
-            <img src="<?php echo htmlspecialchars($current_image); ?>" id="editPreview" class="greeting-img mb-2">
+            <img src="<?php echo htmlspecialchars($current_image); ?>" id="editPreview" class="greeting-img mb-2" alt="Preview">
             <input type="file" name="profile_image" class="form-control form-control-sm mt-2" onchange="previewImage(this)">
         </div>
         <div class="mb-3">
@@ -128,16 +215,46 @@ if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['update_profile'])){
     </form>
 </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="teacherscripts.js"></script>
 <script>
-const viewDiv = document.getElementById('profileView'); const editDiv = document.getElementById('profileEdit');
-document.getElementById('editProfileBtn').onclick = ()=>{ viewDiv.style.display='none'; editDiv.style.display='grid'; };
-document.getElementById('cancelEdit').onclick = ()=>{ editDiv.style.display='none'; viewDiv.style.display='grid'; };
-function previewImage(input){ const preview=document.getElementById('editPreview'); const file=input.files[0]; if(file){ const reader=new FileReader(); reader.onload=e=>preview.src=e.target.result; reader.readAsDataURL(file); } }
-document.querySelectorAll('.sidebar .nav-item').forEach(item=>{ item.addEventListener('click', e=>{ const content=document.querySelector('.content'); content.style.opacity=0; setTimeout(()=>{ window.location.href=item.href; },300); e.preventDefault(); }); });
-lucide.replace();
+const viewDiv = document.getElementById('profileView');
+const editDiv = document.getElementById('profileEdit');
+
+document.getElementById('editProfileBtn').onclick = () => {
+    viewDiv.style.display = 'none';
+    editDiv.style.display = 'grid';
+};
+document.getElementById('cancelEdit').onclick = () => {
+    editDiv.style.display = 'none';
+    viewDiv.style.display = 'grid';
+};
+
+function previewImage(input) {
+    const preview = document.getElementById('editPreview');
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => preview.src = e.target.result;
+        reader.readAsDataURL(file);
+    }
+}
+
+document.querySelectorAll('.sidebar .nav-item').forEach(item=>{
+    item.addEventListener('click', e=>{
+        const content = document.querySelector('.content');
+        if (!content) return;
+        content.style.opacity = 0;
+        setTimeout(()=>{ window.location.href = item.href; }, 200);
+        e.preventDefault();
+    });
+});
+
+if (typeof lucide !== 'undefined') lucide.replace();
 </script>
 </body>
 </html>
-<?php $conn->close(); ?>
+<?php
+$conn->close();
+?>
