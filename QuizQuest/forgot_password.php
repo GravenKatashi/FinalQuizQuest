@@ -37,9 +37,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
             $expires_at = date("Y-m-d H:i:s", time() + 3600);
 
             // Delete old tokens
-            $conn->prepare("DELETE FROM password_resets WHERE user_id = ?")
-                 ->bind_param("i", $user_id)
-                 ->execute();
+            $stmtDelete = $conn->prepare("DELETE FROM password_resets WHERE user_id = ?");
+            if (!$stmtDelete) {
+                die("Prepare failed (DELETE): " . $conn->error);
+            }
+            $stmtDelete->bind_param("i", $user_id);
+            $stmtDelete->execute();
+            $stmtDelete->close();
 
             // Insert new token
             $stmtInsert = $conn->prepare("
