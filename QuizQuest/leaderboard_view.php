@@ -43,8 +43,8 @@ $class_code = $class['class_code'];
 
 /* ----------------------------
    LEADERBOARD QUERY
-   ✅ One row per student
-   ✅ EXP accumulated per class
+   ✅ Show all students in the class
+   ✅ Show 0 EXP if no student_exp record exists
 ----------------------------- */
 $sql = "
 SELECT
@@ -57,9 +57,9 @@ JOIN users u
     ON u.id = sc.student_id
 LEFT JOIN student_exp se
     ON se.student_id = u.id
-    AND se.class_code = sc.class_code
-WHERE sc.class_code = ?
-ORDER BY se.exp DESC, name ASC
+    AND UPPER(se.class_code) = UPPER(sc.class_code)
+WHERE UPPER(sc.class_code) = UPPER(?)
+ORDER BY exp DESC, name ASC
 ";
 
 $stmt2 = $conn->prepare($sql);
@@ -68,7 +68,6 @@ $stmt2->execute();
 
 $res = $stmt2->get_result();
 $leaderboard = [];
-
 while ($row = $res->fetch_assoc()) {
     $leaderboard[] = $row;
 }
@@ -81,7 +80,6 @@ $conn->close();
 <head>
     <meta charset="utf-8">
     <title><?= htmlspecialchars($class['title']) ?> — Leaderboard</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/leaderboard_view.css">
     <link rel="stylesheet" href="assets/css/teacher.css">
@@ -116,7 +114,7 @@ $conn->close();
 
                 <?php if (empty($leaderboard)): ?>
                     <div class="alert alert-info mb-0">
-                        No quiz results yet.
+                        No students enrolled yet.
                     </div>
                 <?php else: ?>
 
