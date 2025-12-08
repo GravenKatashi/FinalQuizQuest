@@ -38,3 +38,7 @@ RAW INPUT: {"class_id":6,"class_code":"4FF2ED","title":"quiz 2","questions":[{"t
 EXTRACTED VALUES: class_id=6, class_code=4FF2ED, teacher_id=14, title=quiz 2
 DB FETCH CLASS: {"class_code":"4FF2ED","teacher_id":14}
 QUIZ INSERTED: quiz_id=25, class_id=6
+RAW INPUT: {"class_id":6,"class_code":"4FF2ED","title":"quiz 3","questions":[{"type":"truefalse","text":"she so pretty","correct":"True","choices":null}]}
+EXTRACTED VALUES: class_id=6, class_code=4FF2ED, teacher_id=14, title=quiz 3
+DB FETCH CLASS: {"class_code":"4FF2ED","teacher_id":14}
+QUIZ INSERTED: quiz_id=26, class_id=6

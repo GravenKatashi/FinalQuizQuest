@@ -9,78 +9,64 @@ $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $student_id = $_SESSION['user_id'] ?? 0;
-
-// Get full name from database
-$full_name = 'Student'; // default
-if ($student_id) {
-    $stmt = $conn->prepare("SELECT full_name FROM users WHERE id = ?");
-    $stmt->bind_param("i", $student_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result && $row = $result->fetch_assoc()) {
-        $full_name = $row['full_name'];
-    }
-    $stmt->close();
-}
+$student_name = $_SESSION['username'] ?? 'Student';
 
 $feedback = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Add class
+    // --- Add Class Code ---
     if (!empty($_POST['class_code'])) {
-        $input_code = strtoupper(trim($_POST['class_code']));
+        $input_code = trim($_POST['class_code']);
 
-        // Check if class exists
-        $stmt = $conn->prepare("SELECT id, title FROM classes WHERE UPPER(class_code) = ?");
+        // Case-insensitive check for class code in classes table
+        $stmt = $conn->prepare("SELECT id FROM classes WHERE UPPER(class_code) = UPPER(?)");
         $stmt->bind_param("s", $input_code);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result && $result->num_rows > 0) {
-            $class = $result->fetch_assoc();
-            $classTitle = $class['title'];
-
-            // Check if student already enrolled
-            $stmtCheck = $conn->prepare("SELECT 1 FROM student_classes WHERE student_id = ? AND UPPER(class_code) = ?");
+            // Check if student already joined this class
+            $stmtCheck = $conn->prepare("SELECT * FROM student_classes WHERE student_id = ? AND UPPER(class_code) = UPPER(?)");
             $stmtCheck->bind_param("is", $student_id, $input_code);
             $stmtCheck->execute();
             $checkResult = $stmtCheck->get_result();
 
             if ($checkResult->num_rows === 0) {
-                // Insert student into class
-                $stmtInsert = $conn->prepare("
-                    INSERT INTO student_classes (student_id, class_code, title)
-                    VALUES (?, ?, ?)
-                ");
-                $stmtInsert->bind_param("iss", $student_id, $input_code, $classTitle);
-                $stmtInsert->execute();
-                $stmtInsert->close();
 
-                $feedback = "<div class='alert alert-success'>Class added successfully!</div>";
+    // ✅ Always store class code in UPPERCASE to match leaderboard join
+            $cleanCode = strtoupper(trim($input_code));
+
+            $stmtInsert = $conn->prepare("
+                INSERT INTO student_classes (student_id, class_code) 
+                VALUES (?, ?)
+            ");
+            $stmtInsert->bind_param("is", $student_id, $cleanCode);
+            $stmtInsert->execute();
+
+            $feedback = "<div class='alert alert-success'>Class added and will now appear in Leaderboard!</div>";
             } else {
                 $feedback = "<div class='alert alert-info'>You have already joined this class.</div>";
             }
+
             $stmtCheck->close();
         } else {
-            $feedback = "<div class='alert alert-danger'>Invalid class code.</div>";
+            $feedback = "<div class='alert alert-danger'>Invalid class code. Please check with your teacher.</div>";
         }
 
         $stmt->close();
     }
 
-    // Remove class
+    // --- Remove Class Code ---
     if (!empty($_POST['remove_class_code'])) {
-        $remove_code = strtoupper(trim($_POST['remove_class_code']));
-        $stmtRemove = $conn->prepare("DELETE FROM student_classes WHERE student_id = ? AND UPPER(class_code) = ?");
+        $remove_code = trim($_POST['remove_class_code']);
+        $stmtRemove = $conn->prepare("DELETE FROM student_classes WHERE student_id = ? AND UPPER(class_code) = UPPER(?)");
         $stmtRemove->bind_param("is", $student_id, $remove_code);
         $stmtRemove->execute();
-        $stmtRemove->close();
-
         $feedback = "<div class='alert alert-warning'>Class removed successfully.</div>";
+        $stmtRemove->close();
     }
 }
-
 
 function renderClassCards($conn, $student_id) {
     // Get classes student joined OR has taken at least one quiz
@@ -229,10 +215,10 @@ function renderCompletedQuizzes($conn, $student_id) {
     <div class="menu-wrapper">
         <div class="nav">
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($full_name) ?>)
+                <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($student_name); ?>)
             </a>
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='student.php'){echo 'active';} ?>" href="student.php">
-                <i data-lucide="layout"></i> Classes
+                <i data-lucide="layout"></i> Quizzes
             </a>
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='leaderboard.php'){echo 'active';} ?>" href="leaderboard.php">
                 <i data-lucide="award"></i> Leaderboard
@@ -244,7 +230,7 @@ function renderCompletedQuizzes($conn, $student_id) {
 
 <div class="content container mt-4">
     <div class="avatar-container d-flex align-items-center gap-3 mb-4">
-        <span class="greeting h5 mb-0">Hello! <?= htmlspecialchars($full_name) ?></span>
+        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($student_name); ?></span>
         <img src="https://i.imgur.com/oQEsWSV.png" alt="Avatar" class="freiren-avatar rounded-circle" width="50" height="50">
     </div>
 
