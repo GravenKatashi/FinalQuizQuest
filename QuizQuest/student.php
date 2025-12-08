@@ -27,11 +27,13 @@ $feedback = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // --- Add Class Code ---
+    /* =======================
+       ADD CLASS
+    ======================== */
     if (!empty($_POST['class_code'])) {
+
         $input_code = trim($_POST['class_code']);
 
-        // Case-insensitive check for class code in classes table
         $stmt = $conn->prepare("
             SELECT id, title 
             FROM classes 
@@ -42,47 +44,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $stmt->get_result();
 
         if ($result && $result->num_rows > 0) {
-            // Check if student already joined this class
-            $stmtCheck = $conn->prepare("SELECT * FROM student_classes WHERE student_id = ? AND UPPER(class_code) = UPPER(?)");
+
+            // ✅ FIX THAT YOU ADDED (THIS IS WORKING)
+            $row = $result->fetch_assoc();
+            $classTitle = $row['title'];
+
+            $stmtCheck = $conn->prepare("
+                SELECT 1
+                FROM student_classes
+                WHERE student_id = ?
+                AND UPPER(class_code) = UPPER(?)
+            ");
             $stmtCheck->bind_param("is", $student_id, $input_code);
             $stmtCheck->execute();
             $checkResult = $stmtCheck->get_result();
 
             if ($checkResult->num_rows === 0) {
 
-            $cleanCode = strtoupper(trim($input_code));
-            $classTitle = $row['title'];
+                $cleanCode = strtoupper(trim($input_code));
 
-            $stmtInsert = $conn->prepare("
-                INSERT INTO student_classes (student_id, class_code, title)
-                VALUES (?, ?, ?)
-            ");
-            $stmtInsert->bind_param("iss", $student_id, $cleanCode, $classTitle);
-            $stmtInsert->execute();
+                $stmtInsert = $conn->prepare("
+                    INSERT INTO student_classes (student_id, class_code, title)
+                    VALUES (?, ?, ?)
+                ");
+                $stmtInsert->bind_param("iss", $student_id, $cleanCode, $classTitle);
+                $stmtInsert->execute();
 
-            $feedback = "<div class='alert alert-success'>Class added and will now appear in Leaderboard!</div>";
+                $feedback = "<div class='alert alert-success'>
+                                Class added and will now appear in Leaderboard!
+                            </div>";
             } else {
-                $feedback = "<div class='alert alert-info'>You have already joined this class.</div>";
+                $feedback = "<div class='alert alert-info'>
+                                You have already joined this class.
+                            </div>";
             }
 
             $stmtCheck->close();
         } else {
-            $feedback = "<div class='alert alert-danger'>Invalid class code. Please check with your teacher.</div>";
+            $feedback = "<div class='alert alert-danger'>
+                            Invalid class code.
+                        </div>";
         }
 
         $stmt->close();
     }
 
-    // --- Remove Class Code ---
+    /* =======================
+       REMOVE CLASS
+    ======================== */
     if (!empty($_POST['remove_class_code'])) {
+
         $remove_code = trim($_POST['remove_class_code']);
-        $stmtRemove = $conn->prepare("DELETE FROM student_classes WHERE student_id = ? AND UPPER(class_code) = UPPER(?)");
+
+        $stmtRemove = $conn->prepare("
+            DELETE FROM student_classes
+            WHERE student_id = ?
+            AND UPPER(class_code) = UPPER(?)
+        ");
         $stmtRemove->bind_param("is", $student_id, $remove_code);
         $stmtRemove->execute();
-        $feedback = "<div class='alert alert-warning'>Class removed successfully.</div>";
+
+        $feedback = "<div class='alert alert-warning'>
+                        Class removed successfully.
+                    </div>";
+
         $stmtRemove->close();
     }
 }
+
 
 function renderClassCards($conn, $student_id) {
     // Get classes student joined OR has taken at least one quiz
