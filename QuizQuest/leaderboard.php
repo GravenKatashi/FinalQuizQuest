@@ -77,11 +77,20 @@ $mysqli->close();
 <!-- Sidebar -->
 <div class="sidebar">
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
+    <?php
+    $currentPage = basename($_SERVER['PHP_SELF']); // gets the current file name
+    ?>
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="profile.php"><i data-lucide="user"></i> Profile (<?=htmlspecialchars($username)?>)</a>
-            <a class="nav-item active" href="classes.php"><i data-lucide="layout"></i> Classes</a>
-            <a class="nav-item" href="leaderboard.php"><i data-lucide="award"></i> Leaderboard</a>
+            <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
+                <i data-lucide="user"></i> Profile (<?=htmlspecialchars($username)?>)
+            </a>
+            <a class="nav-item <?= $currentPage === 'classes.php' ? 'active' : '' ?>" href="classes.php">
+                <i data-lucide="layout"></i> Classes
+            </a>
+            <a class="nav-item <?= $currentPage === 'leaderboard.php' ? 'active' : '' ?>" href="leaderboard.php">
+                <i data-lucide="award"></i> Leaderboard
+            </a>
         </div>
     </div>
     <a class="logout" href="logout.php">Logout</a>
