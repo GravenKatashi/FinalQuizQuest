@@ -12,7 +12,7 @@ if ($mysqli->connect_error) {
 }
 
 $user_id = (int)($_SESSION['user_id']);
-$role = $_SESSION['role'] ?? 'User';
+$role = $_SESSION['role'] ?? 'student';
 
 // Fetch full name from database
 $full_name = 'User';
@@ -25,31 +25,11 @@ if ($resultName && $rowName = $resultName->fetch_assoc()) {
 }
 $stmtName->close();
 
-// --------------------
-// HANDLE CREATE CLASS
-// --------------------
-if ($role === 'teacher' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'], $_POST['section'])) {
-    $title = trim($_POST['title']);
-    $section = trim($_POST['section']);
-    // Generate a random 7-character uppercase class code
-    $class_code = strtoupper(substr(bin2hex(random_bytes(4)), 0, 7));
-
-    $stmt = $mysqli->prepare("INSERT INTO classes (teacher_id, title, section, class_code) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("isss", $user_id, $title, $section, $class_code);
-    if ($stmt->execute()) {
-        header("Location: classes.php"); // refresh page to show new class
-        exit;
-    } else {
-        $error = "Failed to create class. Please try again.";
-    }
-    $stmt->close();
-}
-
 // Fetch classes based on role
 if ($role === 'teacher') {
     $stmt = $mysqli->prepare("SELECT id, title, section, class_code, created_at FROM classes WHERE teacher_id = ? ORDER BY created_at DESC");
     $stmt->bind_param("i", $user_id);
-} else { // student
+} else {
     $stmt = $mysqli->prepare("
         SELECT c.id, c.title, c.section, c.class_code, c.created_at
         FROM classes c
@@ -79,22 +59,24 @@ $stmt->close();
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
+            <a class="nav-item <?= basename($_SERVER['PHP_SELF'])=='profile.php'?'active':'' ?>" href="profile.php">
                 <i data-lucide="user"></i> Profile (<?= htmlspecialchars($full_name) ?>)
             </a>
-            <a class="nav-item active" href="classes.php"><i data-lucide="layout"></i> Classes</a>
-            <a class="nav-item" href="leaderboard.php"><i data-lucide="award"></i> Leaderboard</a>
+            <a class="nav-item <?= basename($_SERVER['PHP_SELF'])=='classes.php'?'active':'' ?>" href="<?= $role === 'teacher' ? 'teacher.php' : 'classes.php' ?>">
+                <i data-lucide="layout"></i> Classes
+            </a>
+            <a class="nav-item <?= basename($_SERVER['PHP_SELF'])=='leaderboard.php'?'active':'' ?>" href="leaderboard.php">
+                <i data-lucide="award"></i> Leaderboard
+            </a>
         </div>
     </div>
     <a class="logout" href="logout.php"><i data-lucide="log-out"></i> Logout</a>
 </div>
 
-<div class="content">
-    <div class="avatar-container">
-        <span class="greeting">
-            Hello <?= htmlspecialchars($username) ?>
-        </span>
-        <img src="https://i.imgur.com/oQEsWSV.png" class="freiren-avatar" alt="avatar">
+<div class="content container mt-4">
+    <div class="avatar-container d-flex align-items-center gap-3 mb-4">
+        <span class="greeting h5 mb-0">Hello! <?= htmlspecialchars($full_name) ?></span>
+        <img src="https://i.imgur.com/oQEsWSV.png" alt="Avatar" class="freiren-avatar rounded-circle" width="50" height="50">
     </div>
 
     <h2 class="quizzes-title mb-4">Your Classes</h2>
@@ -109,34 +91,31 @@ $stmt->close();
             </div>
         <?php endif; ?>
 
-        <!-- Class cards -->
         <?php if(!empty($classes)): ?>
             <?php foreach($classes as $class): ?>
-            <div class="col-md-4 col-sm-6">
-                <div class="card subject-card h-100" style="background: linear-gradient(135deg,#0ea5e9,#0284c7);" onclick="enterClass(<?= (int)$class['id'] ?>)">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0"><?=htmlspecialchars($class['title'])?></h5>
-                            <span class="badge" style="background:rgba(255,255,255,0.15);color:#fff;">Code: <?=htmlspecialchars($class['class_code'])?></span>
-                        </div>
-                        <p class="card-text small mb-1">Section: <?=htmlspecialchars($class['section'])?></p>
-                        <div class="mt-auto text-end">
-                            <small class="text-muted">Created: <?=date('M d, Y', strtotime($class['created_at']))?></small>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card subject-card h-100" style="background: linear-gradient(135deg,#0ea5e9,#0284c7);" onclick="enterClass(<?= (int)$class['id'] ?>)">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0"><?= htmlspecialchars($class['title']) ?></h5>
+                                <span class="badge" style="background:rgba(255,255,255,0.15);color:#fff;">Code: <?= htmlspecialchars($class['class_code']) ?></span>
+                            </div>
+                            <p class="card-text small mb-1">Section: <?= htmlspecialchars($class['section']) ?></p>
+                            <div class="mt-auto text-end">
+                                <small class="text-muted">Created: <?= date('M d, Y', strtotime($class['created_at'])) ?></small>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div class="col-12">
-                <p class="text-muted">No classes found.</p>
-            </div>
+            <div class="col-12"><p class="text-muted">No classes found.</p></div>
         <?php endif; ?>
     </div>
 </div>
 
-<!-- Create Class Modal (only for teachers) -->
 <?php if($role === 'teacher'): ?>
+<!-- Create Class Modal -->
 <div class="modal fade" id="createClassModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form method="POST" class="modal-content">
