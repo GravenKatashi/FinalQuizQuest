@@ -107,7 +107,6 @@ $conn->close();
             <a class="nav-item active" href="leaderboard.php">Back to Leaderboards</a>
         </div>
     </div>
-    <a class="logout" href="logout.php">Logout</a>
 </div>
 
 <div class="content">
