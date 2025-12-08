@@ -52,13 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
         $shake = true;
     }
 }
-
-// Optional: handle cancel if needed
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["cancel"])) {
-    // nothing as requested
-}
-
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -128,26 +123,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["cancel"])) {
             <form method="POST">
 
                 <input type="text" name="username" class="form-control form-control-sm mb-2" placeholder="Username" required>
-
                 <input type="password" name="password" class="form-control form-control-sm mb-2" placeholder="Password" required>
 
-                <div class="register-footer">
-
+                <!-- "Don't have an account?" stays as is -->
+                <div class="links-footer">
                     <p class="no-account">
                         <a href="entry_page.php" class="btn-link">Don't have an account?</a>
                     </p>
-                    
+                    <p class ="forgot-password">
+                        <a href="forgot_password.php" class="btn-link forgot-password">Forgot password?</a>
+                    </p>
                 </div>
 
+                <!-- Error message stays as is -->
                 <div class="error-wrapper">
                     <?php if (!empty($error)) : ?>
                         <div class="error-box"><?php echo $error; ?></div>
                     <?php endif; ?>
                 </div>
-                
-                <div class="login-buttons">
+
+                <!-- Bottom row: Forgot password (left) + Login button (right) -->
+                <div class="login-footer">
                     <button type="submit" name="login">Login</button>
-                    <button type="submit" name="cancel" class="cancel-btn">Cancel</button>
                 </div>
 
             </form>

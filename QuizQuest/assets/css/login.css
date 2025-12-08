@@ -156,14 +156,14 @@ body {
     padding-bottom: 10px;
 }
 
-.register-footer {
+.links-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 5px;
 }
 
-.register-footer p {
+.links-footer p {
     margin: 0;
 }
 
@@ -217,14 +217,7 @@ body {
     animation: shake 0.3s;
 }
 
-.login-buttons {
-    margin-top: 25px;
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-}
-
-.login-buttons button {
+.login-footer button {
     padding: 5px 20px;
     background-color: #ea96f1;
     border: 1px solid black;
@@ -237,19 +230,8 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.login-buttons button.cancel-btn {
-    background-color: #6c757d;
-    color: white;
-}
-
-.login-buttons button:hover {
+.login-footer button:hover {
     background-color: #f3b2f8;
     transform: scale(1.05);
     box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
-}
-
-.login-buttons button.cancel-btn:hover {
-    background-color: #8d979f;
-    transform: scale(1.05);
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
 }
