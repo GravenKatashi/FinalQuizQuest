@@ -269,8 +269,14 @@ body {
     border: 2px solid red !important;
 }
 
-.validation-message {
+.tooltip-popup {
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
     font-size: 0.8rem;
-    color: red;
-    margin-bottom: 0.5rem;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }

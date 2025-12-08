@@ -136,7 +136,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
                 <input type="text" name="school_affiliation" class="form-control form-control-sm mb-2" placeholder="School Affiliation" required>
 
                 <input type="password" name="password" id="password" class="form-control form-control-sm mb-2" placeholder="Password" required>
-                <div id="passwordMsg" class="validation-message" style="display:none;">Minimum of 8 characters</div>
 
                 <input type="password" name="confirm_password" class="form-control form-control-sm mb-2" placeholder="Confirm Password" required>
 
