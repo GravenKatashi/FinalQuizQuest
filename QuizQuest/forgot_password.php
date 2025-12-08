@@ -29,15 +29,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
             $user_id = $user["id"];
 
             // Create reset token
-            $token = bin2hex(random_bytes(32));      // random token
-            $expires_at = date("Y-m-d H:i:s", time() + 3600); // valid for 1 hour
+            $token = bin2hex(random_bytes(32));
+            $expires_at = date("Y-m-d H:i:s", time() + 3600);
 
-            // Optional: delete old tokens for this user
             $conn->prepare("DELETE FROM password_resets WHERE user_id = ?")
                  ->bind_param("i", $user_id)
                  ->execute();
 
-            // Insert new token
             $stmtInsert = $conn->prepare("
                 INSERT INTO password_resets (user_id, token, expires_at)
                 VALUES (?, ?, ?)
@@ -45,10 +43,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
             $stmtInsert->bind_param("iss", $user_id, $token, $expires_at);
             $stmtInsert->execute();
 
-            // Build reset link
             $resetLink = "http://localhost/QuizQuest/reset_password.php?token=" . urlencode($token);
 
-            // Send email via MailHog (using mail())
             $subject = "QuizQuest Password Reset";
             $body = "Hello,\n\n"
                   . "We received a request to reset your QuizQuest password.\n"
@@ -59,47 +55,49 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
             $headers  = "From: no-reply@quizquest.local\r\n";
             $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
-            // This will be intercepted by MailHog in dev environment
             if (mail($email, $subject, $body, $headers)) {
                 $message = "If an account with that email exists, a reset link has been sent.";
             } else {
                 $error = "Unable to send reset email. Please contact the administrator.";
             }
-
         } else {
-            // To avoid revealing if email exists, show generic msg
             $message = "If an account with that email exists, a reset link has been sent.";
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Forgot Password - QuizQuest</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="assets/css/login.css">
 </head>
 <body>
-
+<canvas id="background-canvas"></canvas>
 <header class="header">
-    <div class="logo-container text-center">
-        <img src="assets/images/logo.png" alt="QuizQuest Logo" style="max-width: 200px; height:auto;">
+    <div class="logo-container">
+        <img src="assets/images/logo.png" alt="QuizQuest Logo">
     </div>
 </header>
 
-<div class="container mt-5">
+<div class="container mt-3">
     <div class="login-card">
 
+        <!-- LEFT SIDE -->
         <div class="left-side">
-            <p>Forgot your password?</p>
-            <div class="bottom-info">
-                <div class="side-line"></div>
-                <p>Enter your registered email and we'll send you a reset link.</p>
+            <div class="patch-notes">
+                <h2> Forgot Password </h2>
+                <div class="bottom-info">
+                    <div class="side-line"></div>
+                    <p>Enter your registered email and we'll send you a reset link.</p>
+                </div>
             </div>
         </div>
 
+        <!-- RIGHT SIDE -->
         <div class="right-side">
             <div class="title">
                 <img src="assets/images/quizquest-title.png">
@@ -114,14 +112,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
             <?php endif; ?>
 
             <form method="POST">
-                <div class="input-row">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
+                <input type="email" name="email" class="form-control form-control-sm mb-2" placeholder="Enter your email" required>
 
-                <div class="login-buttons">
+                <div class="login-footer">
+                    <a href="login.php" class="btn-link" style="align-self:center;">Back to Login</a>
                     <button type="submit" name="reset_request">Send Reset Link</button>
-                    <a href="login.php" class="cancel-btn btn btn-sm">Back to Login</a>
                 </div>
             </form>
         </div>
@@ -129,6 +124,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="teacherscripts.js"></script>
 </body>
 </html>
 <?php $conn->close(); ?>
