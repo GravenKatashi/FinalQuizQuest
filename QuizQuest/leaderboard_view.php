@@ -55,23 +55,24 @@ if ($role === "teacher") {
 } else {
     // Student: see only their own results
     $sql = "
-    SELECT 
+    SELECT
         u.id AS student_id,
         COALESCE(u.full_name, u.username) AS name,
-        COALESCE(se.exp,0) AS exp,
-        COALESCE(se.title,'') AS title,
-        q.title AS quiz_name,
-        COALESCE(sq.score,0) AS score
+        COALESCE(se.exp, 0) AS exp,
+        COALESCE(se.title, '') AS title
     FROM student_classes sc
-    JOIN users u ON sc.student_id = u.id
-    LEFT JOIN student_exp se ON se.student_id = u.id AND se.class_code = sc.class_code
-    LEFT JOIN quizzes q ON q.class_code = sc.class_code
-    LEFT JOIN student_quizzes sq ON sq.student_id = u.id AND sq.quiz_id = q.id
-    WHERE sc.class_code = ? AND u.id = ?
-    ORDER BY q.id ASC
+    JOIN users u 
+        ON sc.student_id = u.id
+    LEFT JOIN student_exp se
+        ON se.student_id = u.id 
+        AND se.class_code = sc.class_code
+    WHERE sc.class_code = ?
+    ORDER BY se.exp DESC, name ASC
     ";
     $stmt2 = $conn->prepare($sql);
-    $stmt2->bind_param("si", $class_code, $user_id);
+    $stmt2->bind_param("s", $class_code);
+    $stmt2->execute();
+    $res = $stmt2->get_result();
 }
 
 $stmt2->execute();
@@ -134,59 +135,44 @@ $conn->close();
                 <table class="table table-borderless align-middle leaderboard-table">
 
                     <thead>
-                        <tr>
-                            <th style="width: 80px">#</th>
-                            <th>Student</th>
-                            <th>Quiz</th>
-                            <th class="text-end" style="width: 120px">Score</th>
-                            <th class="text-end" style="width: 120px">EXP</th>
-                            <th style="width: 160px">Title</th>
-                        </tr>
+                    <tr>
+                        <th style="width:80px">#</th>
+                        <th>Student</th>
+                        <th class="text-end" style="width:120px">EXP</th>
+                        <th style="width:160px">Title</th>
+                    </tr>
                     </thead>
 
                     <tbody>
-                        <?php $rank = 1; ?>
-                        <?php foreach ($leaderboard as $i => $row): ?>
+                    <?php $rank = 1; ?>
+                    <?php foreach ($leaderboard as $i => $row): ?>
 
-                        <?php
-                        $medal = '';
-                        if ($i === 0) $medal = '<span class="medal gold">🥇</span>';
-                        elseif ($i === 1) $medal = '<span class="medal silver">🥈</span>';
-                        elseif ($i === 2) $medal = '<span class="medal bronze">🥉</span>';
-                        ?>
+                    <?php
+                    $medal = '';
+                    if ($i === 0) $medal = '🥇';
+                    elseif ($i === 1) $medal = '🥈';
+                    elseif ($i === 2) $medal = '🥉';
+                    ?>
 
-                        <tr class="<?php echo ($i % 2 === 0) ? 'table-row-even' : ''; ?>">
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="rank-circle me-2">
-                                        <?php echo $rank++; ?>
-                                    </div>
-                                    <?php echo $medal; ?>
-                                </div>
-                            </td>
+                    <tr>
+                        <td>
+                            <strong><?= $rank++; ?></strong> <?= $medal ?>
+                        </td>
 
-                            <td>
-                                <strong><?php echo htmlspecialchars($row['name']); ?></strong>
-                            </td>
+                        <td>
+                            <?= htmlspecialchars($row['name']) ?>
+                        </td>
 
-                            <td>
-                                <?php echo htmlspecialchars($row['quiz_name'] ?: '—'); ?>
-                            </td>
+                        <td class="text-end">
+                            <strong><?= (int)$row['exp'] ?></strong>
+                        </td>
 
-                            <td class="text-end">
-                                <?php echo (int)$row['score']; ?>
-                            </td>
+                        <td>
+                            <?= htmlspecialchars($row['title'] ?: '—') ?>
+                        </td>
+                    </tr>
 
-                            <td class="text-end">
-                                <strong><?php echo (int)$row['exp']; ?></strong>
-                            </td>
-
-                            <td>
-                                <?php echo htmlspecialchars($row['title'] ?: '—'); ?>
-                            </td>
-                        </tr>
-
-                        <?php endforeach; ?>
+                    <?php endforeach; ?>
                     </tbody>
 
                 </table>
