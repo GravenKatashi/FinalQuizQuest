@@ -9,18 +9,19 @@ $dbname = "quizmaker";
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
-$error = "";
+$error   = "";
 $success = "";
-$token  = isset($_GET["token"]) ? $_GET["token"] : "";
+$token   = $_GET["token"] ?? "";
 
+/* ===============================
+   VALIDATE TOKEN (GET REQUEST)
+   =============================== */
 if (empty($token)) {
     $error = "Invalid reset token.";
 } else {
-    // Check token and expiry
     $stmt = $conn->prepare("
-        SELECT pr.user_id, pr.expires_at, u.username
+        SELECT pr.user_id, pr.expires_at
         FROM password_resets pr
-        JOIN users u ON pr.user_id = u.id
         WHERE pr.token = ?
         LIMIT 1
     ");
@@ -32,16 +33,15 @@ if (empty($token)) {
         $error = "Invalid or expired reset token.";
     } else {
         $row = $result->fetch_assoc();
-        $user_id   = $row["user_id"];
-        $expiresAt = strtotime($row["expires_at"]);
-
-        if (time() > $expiresAt) {
+        if (time() > strtotime($row["expires_at"])) {
             $error = "This reset link has expired.";
         }
     }
 }
 
-// Handle password change
+/* ===============================
+   HANDLE PASSWORD RESET (POST)
+   =============================== */
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_password"])) {
     $token       = $_POST["token"];
     $newPass     = trim($_POST["new_password"]);
@@ -49,10 +49,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_password"])) {
 
     if (empty($newPass) || empty($confirmPass)) {
         $error = "Please fill in both password fields.";
+    } elseif (strlen($newPass) < 8) {
+        $error = "Password must be at least 8 characters long.";
     } elseif ($newPass !== $confirmPass) {
         $error = "Passwords do not match.";
     } else {
-        // Re-check token for security
+        // Re-check token
         $stmt = $conn->prepare("
             SELECT user_id, expires_at
             FROM password_resets
@@ -66,60 +68,63 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_password"])) {
         if ($res->num_rows !== 1) {
             $error = "Invalid or expired reset token.";
         } else {
-            $row      = $res->fetch_assoc();
-            $user_id  = $row["user_id"];
-            $expiresAt = strtotime($row["expires_at"]);
-
-            if (time() > $expiresAt) {
+            $row = $res->fetch_assoc();
+            if (time() > strtotime($row["expires_at"])) {
                 $error = "This reset link has expired.";
             } else {
-                // Update user password
-                $hashed = password_hash($newPass, PASSWORD_DEFAULT);
-                $stmtUpd = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
-                $stmtUpd->bind_param("si", $hashed, $user_id);
+                $user_id = $row["user_id"];
+                $hashed  = password_hash($newPass, PASSWORD_DEFAULT);
 
-                if ($stmtUpd->execute()) {
-                    // Remove token so it can't be reused
-                    $stmtDel = $conn->prepare("DELETE FROM password_resets WHERE token = ?");
-                    $stmtDel->bind_param("s", $token);
-                    $stmtDel->execute();
+                $upd = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+                $upd->bind_param("si", $hashed, $user_id);
+
+                if ($upd->execute()) {
+                    // Delete token after success
+                    $del = $conn->prepare("DELETE FROM password_resets WHERE token = ?");
+                    $del->bind_param("s", $token);
+                    $del->execute();
 
                     $success = "Password updated successfully! <a href='login.php'>Login here</a>.";
                 } else {
-                    $error = "Error updating password. Please try again.";
+                    $error = "Error updating password.";
                 }
             }
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Reset Password - QuizQuest</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="assets/css/reset_password.css">
 </head>
+
 <body>
+<canvas id="background-canvas"></canvas>
 
 <header class="header">
-    <div class="logo-container text-center">
-        <img src="assets/images/logo.png" alt="QuizQuest Logo" style="max-width: 200px; height:auto;">
+    <div class="logo-container">
+        <img src="assets/images/logo.png" alt="QuizQuest Logo">
     </div>
 </header>
 
-<div class="container mt-5">
+<div class="container mt-3">
     <div class="login-card">
 
+        <!-- LEFT SIDE -->
         <div class="left-side">
-            <p>Reset your password</p>
+            <h2>Reset Password</h2>
             <div class="bottom-info">
                 <div class="side-line"></div>
-                <p>Choose a new password to regain access to your account.</p>
+                <p>Create a new password to regain access to your account.</p>
             </div>
         </div>
 
+        <!-- RIGHT SIDE -->
         <div class="right-side">
             <div class="title">
                 <img src="assets/images/quizquest-title.png">
@@ -134,29 +139,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_password"])) {
             <?php endif; ?>
 
             <?php if (empty($success)) : ?>
-                <form method="POST">
-                    <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
+            <form method="POST">
+                <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
 
-                    <div class="input-row">
-                        <label for="new_password">New Password:</label>
-                        <input type="password" id="new_password" name="new_password" required>
-                    </div>
+                <input type="password"
+                       name="new_password"
+                       class="form-control form-control-sm mb-2"
+                       placeholder="New Password (min 8 characters)"
+                       minlength="8"
+                       required>
 
-                    <div class="input-row">
-                        <label for="confirm_password">Confirm Password:</label>
-                        <input type="password" id="confirm_password" name="confirm_password" required>
-                    </div>
+                <input type="password"
+                       name="confirm_password"
+                       class="form-control form-control-sm mb-2"
+                       placeholder="Confirm Password"
+                       minlength="8"
+                       required>
 
-                    <div class="login-buttons">
-                        <button type="submit" name="reset_password">Update Password</button>
-                    </div>
-                </form>
+                <div class="login-footer">
+                    <button type="submit" name="reset_password">Update Password</button>
+                </div>
+            </form>
             <?php endif; ?>
-        </div>
 
+        </div>
     </div>
 </div>
 
+<script src="teacherscripts.js"></script>
 </body>
 </html>
+
 <?php $conn->close(); ?>
