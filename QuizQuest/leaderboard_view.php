@@ -101,7 +101,6 @@ $conn->close();
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="profile.php">Profile</a>
             <a class="nav-item active" href="leaderboard.php">Leaderboard</a>
         </div>
     </div>
