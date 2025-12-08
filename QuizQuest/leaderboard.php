@@ -91,15 +91,27 @@ $mysqli->close();
 
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="profile.php">Profile</a>
+            <a class="nav-item" href="profile.php">
+                <i data-lucide="user"></i>
+                <span>Profile</span>
+            </a>
 
             <?php if ($role === "teacher"): ?>
-                <a class="nav-item" href="classes.php">Classes</a>
+                <a class="nav-item" href="classes.php">
+                    <i data-lucide="layout"></i>
+                    <span>Classes</span>
+                </a>
             <?php else: ?>
-                <a class="nav-item" href="student.php">Quizzes</a>
+                <a class="nav-item" href="student.php">
+                    <i data-lucide="file-text"></i>
+                    <span>Quizzes</span>
+                </a>
             <?php endif; ?>
 
-            <a class="nav-item active" href="leaderboard.php">Leaderboard</a>
+            <a class="nav-item active" href="leaderboard.php">
+                <i data-lucide="award"></i>
+                <span>Leaderboard</span>
+            </a>
         </div>
     </div>
 
