@@ -232,7 +232,7 @@ function renderCompletedQuizzes($conn, $student_id) {
 
 <div class="content container mt-4">
     <div class="avatar-container d-flex align-items-center gap-3 mb-4">
-        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($student_name); ?></span>
+        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($username); ?></span>
         <img src="https://i.imgur.com/oQEsWSV.png" alt="Avatar" class="freiren-avatar rounded-circle" width="50" height="50">
     </div>
 
