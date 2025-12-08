@@ -29,15 +29,17 @@ if ($role === "teacher") {
             c.section,
             c.class_code,
             c.created_at,
-            COUNT(DISTINCT sq.student_id) AS stat_count
-        FROM classes c
+            COUNT(DISTINCT sq.id) AS stat_count
+        FROM student_classes sc
+        JOIN classes c ON c.class_code = sc.class_code
         LEFT JOIN quizzes q ON q.class_code = c.class_code
-        LEFT JOIN student_quizzes sq ON sq.quiz_id = q.id
-        WHERE c.teacher_id = ?
+        LEFT JOIN student_quizzes sq 
+            ON sq.quiz_id = q.id AND sq.student_id = ?
+        WHERE sc.student_id = ?
         GROUP BY c.id, c.title, c.section, c.class_code, c.created_at
         ORDER BY c.created_at DESC
     ");
-    $stmt->bind_param("i", $user_id);
+    $stmt->bind_param("ii", $user_id, $user_id);
 
 } else {
     $stmt = $mysqli->prepare("
