@@ -8,8 +8,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
 $mysqli = new mysqli("localhost","root","","quizmaker");
 if ($mysqli->connect_error) die("Connection failed: ".$mysqli->connect_error);
 
-$teacher_id = (int)$_SESSION['user_id'];
-$teacher_name = $_SESSION['username'] ?? 'Teacher';
+$teacher_id   = (int)($_SESSION['user_id'] ?? 0);
+$teacher_name = $_SESSION['username'] ?? 'User';
+$role         = $_SESSION['role'] ?? 'teacher';  // default to teacher
+$roleDisplay  = ucfirst($role);  
 
 // detect if inside a class
 $class_id = isset($_GET['class_id']) ? (int)$_GET['class_id'] : null;
@@ -79,8 +81,9 @@ function renderQuizCards($mysqli, $teacher_id, $class_id){
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="profile.php"><i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($teacher_name); ?>)</a>
-            
+            <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
+                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($teacher_name) ?> - <?= $roleDisplay ?>)
+            </a>
             <?php if ($inside_class): ?>
                 <a class="nav-item active" href="teacher.php?class_id=<?php echo (int)$class_id; ?>"><i data-lucide="layout"></i> Quizzes</a>
                 <a class="nav-item" href="quizmaker/index.php?class_id=<?php echo (int)$class_id; ?>"><i data-lucide="edit-3"></i> Quizmaker</a>

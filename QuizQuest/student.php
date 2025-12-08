@@ -8,8 +8,10 @@ $dbname = "quizmaker";
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
-$student_id = $_SESSION['user_id'];
-$username = $_SESSION['username'];
+$student_id = $_SESSION['user_id'] ?? 0;
+$username   = $_SESSION['username'] ?? 'User';
+$role       = $_SESSION['role'] ?? 'student';  // default to student
+$roleDisplay = ucfirst($role);     
 
 $feedback = '';
 
@@ -215,7 +217,7 @@ function renderCompletedQuizzes($conn, $student_id) {
     <div class="menu-wrapper">
         <div class="nav">
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($username); ?>)
+                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($username) ?> - <?= $roleDisplay ?>)
             </a>
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='student.php'){echo 'active';} ?>" href="student.php">
                 <i data-lucide="layout"></i> Classes
@@ -230,7 +232,7 @@ function renderCompletedQuizzes($conn, $student_id) {
 
 <div class="content container mt-4">
     <div class="avatar-container d-flex align-items-center gap-3 mb-4">
-        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($username); ?></span>
+        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($student_name); ?></span>
         <img src="https://i.imgur.com/oQEsWSV.png" alt="Avatar" class="freiren-avatar rounded-circle" width="50" height="50">
     </div>
 

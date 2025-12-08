@@ -11,9 +11,10 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
-$role = $_SESSION['role'];
-$user_id = (int) $_SESSION['user_id'];
-$username = $_SESSION['username'];
+$role     = $_SESSION['role'] ?? 'student';   // default to student
+$user_id  = (int)($_SESSION['user_id']);
+$username = $_SESSION['username'] ?? 'User';
+$roleDisplay = ucfirst($role); // Capitalizes first letter
 
 if ($role === "teacher") {
     $stmt = $mysqli->prepare("
@@ -82,7 +83,7 @@ $mysqli->close();
     <div class="menu-wrapper">
         <div class="nav">
             <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?=htmlspecialchars($username)?>)
+                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($roleDisplay) ?>)
             </a>
             <a class="nav-item <?= $currentPage === 'student.php' ? 'active' : '' ?>" href="student.php">
                 <i data-lucide="layout"></i> Classes

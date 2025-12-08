@@ -7,8 +7,10 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id  = (int)($_SESSION['user_id']);
-$username = $_SESSION['username'];
-$role     = $_SESSION['role'] ?? 'student';
+$username = $_SESSION['username'] ?? 'User';
+$role     = $_SESSION['role'] ?? 'student'; // default to student if not set
+$roleDisplay = ucfirst($role); // makes first letter uppercase
+
 
 $conn = new mysqli("localhost", "root", "", "quizmaker");
 if ($conn->connect_error) {
@@ -143,8 +145,8 @@ $stmt->close();
     <!-- Navigation -->
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($username); ?>)
+            <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
+                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($roleDisplay) ?>)
             </a>
 
             <?php if ($role === "teacher"): ?>
