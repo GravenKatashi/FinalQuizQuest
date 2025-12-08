@@ -42,7 +42,7 @@ if ($role === "teacher") {
     ");
     $stmt->bind_param("i", $user_id);
 
-} else { // student
+} else { // ✅ STUDENT — SHOW JOINED CLASSES + QUIZ CLASSES (EVEN 0 QUIZZES)
 
     $stmt = $mysqli->prepare("
         SELECT 
@@ -51,12 +51,15 @@ if ($role === "teacher") {
             c.section,
             c.class_code,
             c.created_at,
-            COUNT(sq.id) AS stat_count
+            COUNT(DISTINCT sq.quiz_id) AS stat_count
         FROM student_classes sc
-        JOIN classes c ON c.class_code = sc.class_code
-        LEFT JOIN quizzes q ON q.class_code = c.class_code
+        JOIN classes c 
+            ON c.class_code = sc.class_code
+        LEFT JOIN quizzes q 
+            ON q.class_code = c.class_code
         LEFT JOIN student_quizzes sq 
-            ON sq.quiz_id = q.id AND sq.student_id = ?
+            ON sq.quiz_id = q.id 
+            AND sq.student_id = ?
         WHERE sc.student_id = ?
         GROUP BY c.id
         ORDER BY c.created_at DESC
