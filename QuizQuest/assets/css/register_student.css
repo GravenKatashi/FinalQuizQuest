@@ -270,3 +270,13 @@ body {
     background: #F472B6;
     color: #fff;
 }
+
+.form-control.invalid {
+    border-color: red;
+}
+
+.validation-message {
+    font-size: 0.85rem;
+    color: red;
+    margin-top: 2px;
+}

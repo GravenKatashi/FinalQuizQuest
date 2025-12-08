@@ -6,12 +6,24 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$mysqli = new mysqli("localhost","root","","quizmaker");
-if ($mysqli->connect_error) die("Connection failed: ".$mysqli->connect_error);
+$mysqli = new mysqli("localhost", "root", "", "quizmaker");
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
+}
 
-$user_id = (int)$_SESSION['user_id'];
-$username = $_SESSION['username'] ?? 'User';
-$role = $_SESSION['role'];
+$user_id = (int)($_SESSION['user_id']);
+$role = $_SESSION['role'] ?? 'User';
+
+// Fetch full name from database
+$full_name = 'User';
+$stmtName = $mysqli->prepare("SELECT full_name FROM users WHERE id = ?");
+$stmtName->bind_param("i", $user_id);
+$stmtName->execute();
+$resultName = $stmtName->get_result();
+if ($resultName && $rowName = $resultName->fetch_assoc()) {
+    $full_name = $rowName['full_name'];
+}
+$stmtName->close();
 
 // --------------------
 // HANDLE CREATE CLASS
@@ -67,7 +79,9 @@ $stmt->close();
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="profile.php"><i data-lucide="user"></i> Profile (<?=htmlspecialchars($username)?>)</a>
+            <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
+                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($full_name) ?>)
+            </a>
             <a class="nav-item active" href="classes.php"><i data-lucide="layout"></i> Classes</a>
             <a class="nav-item" href="leaderboard.php"><i data-lucide="award"></i> Leaderboard</a>
         </div>

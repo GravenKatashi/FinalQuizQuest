@@ -130,8 +130,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 
                 <input type="text" name="username" class="form-control form-control-sm mb-2" placeholder="Username" required>
                 <input type="text" name="full_name" class="form-control form-control-sm mb-2" placeholder="Full Name" required>
-                <input type="text" name="email" class="form-control form-control-sm mb-2" placeholder="Email" required>
-                <input type="password" name="password" class="form-control form-control-sm mb-2" placeholder="Password" required>
+                <input type="text" name="email" id="email" class="form-control form-control-sm mb-2" placeholder="Email" required>
+                <div id="emailMsg" class="validation-message"></div>
+                <input type="password" name="password" id="password" class="form-control form-control-sm mb-2" placeholder="Password" required>
+                <div id="passwordMsg" class="validation-message">Minimum 8 characters</div>
                 <input type="password" name="confirm_password" class="form-control form-control-sm mb-2" placeholder="Confirm Password" required>
 
                 <div class="register-footer">
@@ -169,7 +171,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.259.0/dist/lucide.js"></script>
 <script src="teacherscripts.js"></script>
-
+<script src="registerscripts.js"></script>
 </body>
 </html>
 
