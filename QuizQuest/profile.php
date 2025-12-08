@@ -153,7 +153,7 @@ $stmt->close();
                 </a>
             <?php else: ?>
                 <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='student.php'){echo 'active';} ?>" href="student.php">
-                    <i data-lucide="file-text"></i> Quizzes
+                    <i data-lucide="file-text"></i> Classes
                 </a>
             <?php endif; ?>
 

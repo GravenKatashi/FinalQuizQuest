@@ -22,3 +22,11 @@ RAW INPUT: {"class_id":3,"class_code":"XMPZXEB","title":"title","questions":[{"t
 EXTRACTED VALUES: class_id=3, class_code=XMPZXEB, teacher_id=11, title=title
 DB FETCH CLASS: {"class_code":"XMPZXEB","teacher_id":11}
 QUIZ INSERTED: quiz_id=21, class_id=3
+RAW INPUT: {"class_id":4,"class_code":"276F025","title":"quiz 1","questions":[{"type":"multiple","text":"mahal kita","correct":"B","choices":["berna","bernadette","regir","my bebe"]}]}
+EXTRACTED VALUES: class_id=4, class_code=276F025, teacher_id=14, title=quiz 1
+DB FETCH CLASS: {"class_code":"276F025","teacher_id":14}
+QUIZ INSERTED: quiz_id=22, class_id=4
+RAW INPUT: {"class_id":4,"class_code":"276F025","title":"quiz 2","questions":[{"type":"truefalse","text":"i love bernadette","correct":"True","choices":null}]}
+EXTRACTED VALUES: class_id=4, class_code=276F025, teacher_id=14, title=quiz 2
+DB FETCH CLASS: {"class_code":"276F025","teacher_id":14}
+QUIZ INSERTED: quiz_id=23, class_id=4
