@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["reset_request"])) {
             $stmtInsert->execute();
 
             // Reset link
-            $resetLink = "http://localhost/QuizQuest/reset_password.php?token=" . urlencode($token);
+            $resetLink = "http://localhost/FinalQuizQuest/QuizQuest/reset_password.php?token=" . urlencode($token);
 
             // PHPMailer
             $mail = new PHPMailer(true);
