@@ -1,24 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+    const form = document.querySelector("form");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
-    const form = document.querySelector("form");
 
-    // Email validation
-    function validateEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-    emailInput.addEventListener("input", () => {
-        if (!validateEmail(emailInput.value)) {
-            emailInput.classList.add("invalid");
-        } else {
-            emailInput.classList.remove("invalid");
-        }
-    });
-
-    // Password tooltip
+    // Tooltip for password
     let tooltip;
-    passwordInput.addEventListener("focus", (e) => {
+    passwordInput.addEventListener("focus", () => {
         tooltip = document.createElement("div");
         tooltip.className = "tooltip-popup";
         tooltip.textContent = "Minimum of 8 characters";
@@ -36,6 +24,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Email validation (must contain @)
+    function validateEmail(email) {
+        return email.includes("@");
+    }
+
+    emailInput.addEventListener("input", () => {
+        if (!validateEmail(emailInput.value)) {
+            emailInput.classList.add("invalid");
+        } else {
+            emailInput.classList.remove("invalid");
+        }
+    });
+
     // Password validation
     passwordInput.addEventListener("input", () => {
         if (passwordInput.value.length < 8) {
@@ -45,16 +46,43 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Required field validation for other inputs (on blur)
+    const requiredInputs = form.querySelectorAll("input:not([type='password']):not(#email)");
+
+    requiredInputs.forEach(input => {
+        input.addEventListener("blur", () => {
+            if (input.value.trim() === "") {
+                input.classList.add("invalid");
+            } else {
+                input.classList.remove("invalid");
+            }
+        });
+    });
+
     // Form submission check
     form.addEventListener("submit", (e) => {
         let valid = true;
+
+        // Check email
         if (!validateEmail(emailInput.value)) valid = false;
+
+        // Check password
         if (passwordInput.value.length < 8) valid = false;
+
+        // Check required fields
+        requiredInputs.forEach(input => {
+            if (input.value.trim() === "") {
+                input.classList.add("invalid");
+                valid = false;
+            }
+        });
 
         if (!valid) {
             e.preventDefault();
-            if (!validateEmail(emailInput.value)) emailInput.focus();
-            else passwordInput.focus();
+            // Focus on the first invalid field
+            const firstInvalid = form.querySelector(".invalid");
+            if (firstInvalid) firstInvalid.focus();
         }
     });
+
 });

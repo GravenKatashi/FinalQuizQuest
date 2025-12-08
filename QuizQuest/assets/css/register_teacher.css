@@ -267,6 +267,7 @@ body {
 
 .invalid {
     border: 2px solid red !important;
+    box-shadow: 0 0 5px red;
 }
 
 .tooltip-popup {
