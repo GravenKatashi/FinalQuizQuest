@@ -19,3 +19,9 @@
     font-size: 1.6rem;
     font-weight: 600;
 }
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}

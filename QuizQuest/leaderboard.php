@@ -170,6 +170,10 @@ function openLeaderboard(classId) {
     window.location.href = `leaderboard_view.php?class_id=${classId}`;
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.259.0/dist/lucide.js"></script>
+<script>
+    lucide.replace();
+</script>
 <script src="teacherscripts.js"></script>
 
 </body>
