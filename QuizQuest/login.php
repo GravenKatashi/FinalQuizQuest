@@ -38,6 +38,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
                 exit;
             }
 
+            if ($user["role"] === "admin") {
+                header("Location: admin_users.php");  // <-- new admin dashboard
+                exit;
+            }
+
             // ✅ Fallback safety
             header("Location: index.php");
             exit;

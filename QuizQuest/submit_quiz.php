@@ -62,13 +62,6 @@ $insert = $conn->prepare("INSERT INTO student_quizzes (student_id, quiz_id, scor
 $insert->bind_param("iii", $student_id, $quiz_id, $score);
 $successInsert = $insert->execute();
 
-// Remove class from active classes if submission successful
-if ($successInsert && $class_code) {
-    $del = $conn->prepare("DELETE FROM student_classes WHERE student_id = ? AND class_code = ?");
-    $del->bind_param("is", $student_id, $class_code);
-    $del->execute();
-}
-
 /* ==========================================================
    EXP + LEVEL SYSTEM
    ========================================================== */
