@@ -11,10 +11,19 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
-$role     = $_SESSION['role'] ?? 'student';   // default to student
-$user_id  = (int)($_SESSION['user_id']);
-$username = $_SESSION['username'] ?? 'User';
-$roleDisplay = ucfirst($role); // Capitalizes first letter
+$user_id = (int)($_SESSION['user_id']);
+$role = $_SESSION['role'] ?? 'User';
+
+// Fetch full name from database
+$full_name = 'User';
+$stmtName = $mysqli->prepare("SELECT full_name FROM users WHERE id = ?");
+$stmtName->bind_param("i", $user_id);
+$stmtName->execute();
+$resultName = $stmtName->get_result();
+if ($resultName && $rowName = $resultName->fetch_assoc()) {
+    $full_name = $rowName['full_name'];
+}
+$stmtName->close();
 
 if ($role === "teacher") {
     $stmt = $mysqli->prepare("
@@ -83,7 +92,7 @@ $mysqli->close();
     <div class="menu-wrapper">
         <div class="nav">
             <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($roleDisplay) ?>)
+                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($full_name) ?>)
             </a>
             <a class="nav-item <?= $currentPage === 'student.php' ? 'active' : '' ?>" href="student.php">
                 <i data-lucide="layout"></i> Classes
