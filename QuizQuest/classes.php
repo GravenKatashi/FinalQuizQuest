@@ -13,6 +13,26 @@ $user_id = (int)$_SESSION['user_id'];
 $username = $_SESSION['username'] ?? 'User';
 $role = $_SESSION['role'];
 
+// --------------------
+// HANDLE CREATE CLASS
+// --------------------
+if ($role === 'teacher' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'], $_POST['section'])) {
+    $title = trim($_POST['title']);
+    $section = trim($_POST['section']);
+    // Generate a random 7-character uppercase class code
+    $class_code = strtoupper(substr(bin2hex(random_bytes(4)), 0, 7));
+
+    $stmt = $mysqli->prepare("INSERT INTO classes (teacher_id, title, section, class_code) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $user_id, $title, $section, $class_code);
+    if ($stmt->execute()) {
+        header("Location: classes.php"); // refresh page to show new class
+        exit;
+    } else {
+        $error = "Failed to create class. Please try again.";
+    }
+    $stmt->close();
+}
+
 // Fetch classes based on role
 if ($role === 'teacher') {
     $stmt = $mysqli->prepare("SELECT id, title, section, class_code, created_at FROM classes WHERE teacher_id = ? ORDER BY created_at DESC");
