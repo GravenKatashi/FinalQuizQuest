@@ -22,12 +22,26 @@ document.addEventListener("DOMContentLoaded", () => {
             tooltip.remove();
             tooltip = null;
         }
+        // Validate password on blur
+        if (passwordInput.value.length < 8) {
+            passwordInput.classList.add("invalid");
+        } else {
+            passwordInput.classList.remove("invalid");
+        }
     });
 
     // Email validation (must contain @)
     function validateEmail(email) {
         return email.includes("@");
     }
+
+    emailInput.addEventListener("blur", () => {
+        if (!validateEmail(emailInput.value)) {
+            emailInput.classList.add("invalid");
+        } else {
+            emailInput.classList.remove("invalid");
+        }
+    });
 
     emailInput.addEventListener("input", () => {
         if (!validateEmail(emailInput.value)) {
@@ -37,16 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Password validation
-    passwordInput.addEventListener("input", () => {
-        if (passwordInput.value.length < 8) {
-            passwordInput.classList.add("invalid");
-        } else {
-            passwordInput.classList.remove("invalid");
-        }
-    });
-
-    // Required field validation for other inputs (on blur)
+    // All other required fields
     const requiredInputs = form.querySelectorAll("input:not([type='password']):not(#email)");
 
     requiredInputs.forEach(input => {
@@ -77,9 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // Focus on first invalid field
         if (!valid) {
             e.preventDefault();
-            // Focus on the first invalid field
             const firstInvalid = form.querySelector(".invalid");
             if (firstInvalid) firstInvalid.focus();
         }
