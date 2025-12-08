@@ -8,8 +8,8 @@ $dbname = "quizmaker";
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
-$student_id = $_SESSION['user_id'] ?? 0;
-$username = $_SESSION['username'] ?? 0;
+$student_id = $_SESSION['user_id'];
+$username = $_SESSION['username'];
 
 $feedback = '';
 
@@ -230,7 +230,7 @@ function renderCompletedQuizzes($conn, $student_id) {
 
 <div class="content container mt-4">
     <div class="avatar-container d-flex align-items-center gap-3 mb-4">
-        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($student_name); ?></span>
+        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($username); ?></span>
         <img src="https://i.imgur.com/oQEsWSV.png" alt="Avatar" class="freiren-avatar rounded-circle" width="50" height="50">
     </div>
 

@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id  = (int)($_SESSION['user_id']);
-$username = $_SESSION['username'] ?? 0;
+$username = $_SESSION['username'];
 $role     = $_SESSION['role'] ?? 'student';
 
 $conn = new mysqli("localhost", "root", "", "quizmaker");
