@@ -80,16 +80,11 @@ $mysqli->close();
 
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="profile.php">Profile</a>
-
-            <?php if ($role === "teacher"): ?>
-                <a class="nav-item" href="classes.php">Classes</a>
-            <?php else: ?>
-                <a class="nav-item" href="student.php">Quizzes</a>
-            <?php endif; ?>
-
-            <a class="nav-item active" href="leaderboard.php">Leaderboard</a>
+            <a class="nav-item" href="profile.php"><i data-lucide="user"></i> Profile (<?=htmlspecialchars($username)?>)</a>
+            <a class="nav-item active" href="classes.php"><i data-lucide="layout"></i> Classes</a>
+            <a class="nav-item" href="leaderboard.php"><i data-lucide="award"></i> Leaderboard</a>
         </div>
+    </div>
     </div>
 
     <a class="logout" href="logout.php">Logout</a>
