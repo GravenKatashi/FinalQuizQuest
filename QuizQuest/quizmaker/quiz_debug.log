@@ -58,7 +58,15 @@ RAW INPUT: {"class_id":7,"class_code":"FB402BD","title":"Babymetal Test","questi
 EXTRACTED VALUES: class_id=7, class_code=FB402BD, teacher_id=16, title=Babymetal Test
 DB FETCH CLASS: {"class_code":"FB402BD","teacher_id":16}
 QUIZ INSERTED: quiz_id=30, class_id=7
-RAW INPUT: {"class_id":8,"class_code":"FBAA87F","title":"quiz 4","questions":[{"type":"identification","text":"adsdsada","correct":"asdasdasd","choices":null}]}
-EXTRACTED VALUES: class_id=8, class_code=FBAA87F, teacher_id=29, title=quiz 4
-DB FETCH CLASS: {"class_code":"FBAA87F","teacher_id":29}
-QUIZ INSERTED: quiz_id=31, class_id=8
+RAW INPUT: {"class_id":9,"class_code":"6AC02FC","title":"hahaha","questions":[{"type":"multiple","text":"bruh","correct":"C","choices":["a","b","c","d"]}]}
+EXTRACTED VALUES: class_id=9, class_code=6AC02FC, teacher_id=30, title=hahaha
+DB FETCH CLASS: {"class_code":"6AC02FC","teacher_id":30}
+QUIZ INSERTED: quiz_id=33, class_id=9
+RAW INPUT: {"class_id":9,"class_code":"6AC02FC","title":"bleh bleh","questions":[{"type":"multiple","text":"asasas","correct":"A","choices":["s","s","s","s"]}]}
+EXTRACTED VALUES: class_id=9, class_code=6AC02FC, teacher_id=30, title=bleh bleh
+DB FETCH CLASS: {"class_code":"6AC02FC","teacher_id":30}
+QUIZ INSERTED: quiz_id=34, class_id=9
+RAW INPUT: {"class_id":9,"class_code":"6AC02FC","title":"title","questions":[{"type":"multiple","text":"sasas","correct":"A","choices":["ss","ss","ss","ss"]}]}
+EXTRACTED VALUES: class_id=9, class_code=6AC02FC, teacher_id=30, title=title
+DB FETCH CLASS: {"class_code":"6AC02FC","teacher_id":30}
+QUIZ INSERTED: quiz_id=35, class_id=9

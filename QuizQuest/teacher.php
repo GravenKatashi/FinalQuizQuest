@@ -11,7 +11,18 @@ if ($mysqli->connect_error) die("Connection failed: ".$mysqli->connect_error);
 $teacher_id   = (int)($_SESSION['user_id'] ?? 0);
 $teacher_name = $_SESSION['username'] ?? 'User';
 $role         = $_SESSION['role'] ?? 'teacher';  // default to teacher
-$roleDisplay  = ucfirst($role);  
+
+$full_name = 'User';
+$stmtName = $mysqli->prepare("SELECT full_name FROM users WHERE id = ?");
+$stmtName->bind_param("i", $teacher_id);
+$stmtName->execute();
+$resultName = $stmtName->get_result();
+if ($resultName && $rowName = $resultName->fetch_assoc()) {
+    $full_name = $rowName['full_name'];
+}
+$stmtName->close();
+
+$feedback = '';
 
 // detect if inside a class
 $class_id = isset($_GET['class_id']) ? (int)$_GET['class_id'] : null;
@@ -81,13 +92,12 @@ function renderQuizCards($mysqli, $teacher_id, $class_id){
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest">
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($teacher_name) ?> - <?= $roleDisplay ?>)
+            <a class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>" href="profile.php">
+                <i data-lucide="user"></i> Profile (<?= htmlspecialchars($full_name) ?>)
             </a>
-            <?php if ($inside_class): ?>
-                <a class="nav-item active" href="teacher.php?class_id=<?php echo (int)$class_id; ?>"><i data-lucide="layout"></i> Quizzes</a>
-                <a class="nav-item" href="quizmaker/index.php?class_id=<?php echo (int)$class_id; ?>"><i data-lucide="edit-3"></i> Quizmaker</a>
-            <?php endif; ?>
+            <a class="nav-item <?= basename($_SERVER['PHP_SELF']) === 'classes.php' ? 'active' : '' ?>" href="classes.php">
+                <i data-lucide="layout"></i> Classes
+            </a>
             <a class="nav-item" href="leaderboard.php"><i data-lucide="award"></i> Leaderboard</a>
         </div>
     </div>
@@ -96,7 +106,7 @@ function renderQuizCards($mysqli, $teacher_id, $class_id){
 
 <div class="content">
     <div class="avatar-container">
-        <span class="greeting">Hello! <?php echo htmlspecialchars($teacher_name); ?></span>
+        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($full_name); ?></span>
         <img src="https://i.imgur.com/oQEsWSV.png" alt="avatar" class="freiren-avatar">
     </div>
 

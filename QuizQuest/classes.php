@@ -104,7 +104,7 @@ $stmt->close();
 
 <div class="content">
     <div class="avatar-container">
-        <span class="greeting">Hello! <?=htmlspecialchars($username)?></span>
+        <span class="greeting h5 mb-0">Hello! <?php echo htmlspecialchars($full_name); ?></span>
         <img src="https://i.imgur.com/oQEsWSV.png" alt="avatar" class="freiren-avatar">
     </div>
 
