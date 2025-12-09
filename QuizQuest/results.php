@@ -13,14 +13,20 @@ if (!$quiz_id) die("Quiz not specified.");
 
 // Fetch quiz info including class
 $stmt = $conn->prepare("
-    SELECT q.title AS quiz_title, c.title AS class_title, c.section, c.class_code
+    SELECT 
+        q.title AS quiz_title,
+        q.class_id,
+        c.title AS class_title,
+        c.section,
+        c.class_code
     FROM quizzes q
-    JOIN classes c ON UPPER(q.class_code) = UPPER(c.class_code)
+    JOIN classes c ON q.class_id = c.id
     WHERE q.id = ?
 ");
 $stmt->bind_param("i", $quiz_id);
 $stmt->execute();
 $quiz_info = $stmt->get_result()->fetch_assoc();
+$_SESSION['class_id'] = $quiz_info['class_id'];
 $stmt->close();
 
 // Fetch all students who took this quiz
@@ -98,7 +104,9 @@ $conn->close();
     <img src="assets/images/logo.png" class="logo-img" alt="QuizQuest Logo">
     <div class="menu-wrapper">
         <div class="nav">
-            <a class="nav-item" href="teacher.php"><i data-lucide="layout"></i> Dashboard</a>
+            <a class="nav-item" href="teacher.php?class_id=<?php echo $_SESSION['class_id']; ?>">
+                <i data-lucide="layout"></i> Back to Classroom
+            </a>
         </div>
     </div>
     <a class="logout" href="logout.php"><i data-lucide="log-out"></i> Logout</a>

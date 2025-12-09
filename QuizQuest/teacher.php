@@ -63,7 +63,7 @@ function renderQuizCards($mysqli, $teacher_id, $class_id){
             echo '      <p class="card-text small text-muted mb-3">Manage or review this quiz.</p>';
             echo '      <div class="d-flex gap-2 mb-3">';
             echo '        <button class="btn btn-sm btn-outline-light flex-fill" onclick="editQuiz('.(int)$q['id'].')">Edit</button>';
-            echo '        <a href="quiz_results.php?class_id='.urlencode($class_id).'&quiz_id='.urlencode($q['id']).'" class="btn btn-sm btn-outline-light flex-fill text-center">Results</a>';
+            echo '        <a href="results.php?class_id='.urlencode($class_id).'&quiz_id='.urlencode($q['id']).'" class="btn btn-sm btn-outline-light flex-fill text-center">Results</a>';
             echo '      </div>';
             echo '      <div class="mt-auto text-end">';
             echo '        <small class="text-muted">Created: '.date('M d, Y', strtotime($q['created_at'])).'</small>';
