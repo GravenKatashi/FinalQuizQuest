@@ -58,3 +58,7 @@ RAW INPUT: {"class_id":7,"class_code":"FB402BD","title":"Babymetal Test","questi
 EXTRACTED VALUES: class_id=7, class_code=FB402BD, teacher_id=16, title=Babymetal Test
 DB FETCH CLASS: {"class_code":"FB402BD","teacher_id":16}
 QUIZ INSERTED: quiz_id=30, class_id=7
+RAW INPUT: {"class_id":8,"class_code":"FBAA87F","title":"quiz 4","questions":[{"type":"identification","text":"adsdsada","correct":"asdasdasd","choices":null}]}
+EXTRACTED VALUES: class_id=8, class_code=FBAA87F, teacher_id=29, title=quiz 4
+DB FETCH CLASS: {"class_code":"FBAA87F","teacher_id":29}
+QUIZ INSERTED: quiz_id=31, class_id=8

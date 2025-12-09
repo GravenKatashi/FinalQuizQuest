@@ -1,4 +1,3 @@
-
 // ===== Canvas Background =====
 const canvas = document.getElementById('background-canvas');
 const ctx = canvas.getContext('2d');
