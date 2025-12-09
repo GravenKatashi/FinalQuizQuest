@@ -21,7 +21,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // ---------------------------
     const urlParams = new URLSearchParams(window.location.search);
     classIdHidden.value = urlParams.get("class_id") || "";
+    quizCodeInput.value = urlParams.get("class_code") || "";
     console.log("Class ID from URL:", classIdHidden.value); // Debug
+    console.log("Class Code from URL:", quizCodeInput.value);
 
     // ---------------------------
     // Quiz State
@@ -248,7 +250,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Reset editor and preview
                 questions = [];
                 renderQuestions();
-                quizCodeInput.value = '';
                 quizTitleInput.value = '';
                 buildEditor(currentType);
 

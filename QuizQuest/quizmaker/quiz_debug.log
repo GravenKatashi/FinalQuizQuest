@@ -30,15 +30,31 @@ RAW INPUT: {"class_id":4,"class_code":"276F025","title":"quiz 2","questions":[{"
 EXTRACTED VALUES: class_id=4, class_code=276F025, teacher_id=14, title=quiz 2
 DB FETCH CLASS: {"class_code":"276F025","teacher_id":14}
 QUIZ INSERTED: quiz_id=23, class_id=4
-RAW INPUT: {"class_id":6,"class_code":"4FF2ED","title":"quiz 1","questions":[{"type":"multiple","text":"i love bernadette","correct":"A","choices":["yes","yes","yes","yes"]}]}
-EXTRACTED VALUES: class_id=6, class_code=4FF2ED, teacher_id=14, title=quiz 1
-DB FETCH CLASS: {"class_code":"4FF2ED","teacher_id":14}
-QUIZ INSERTED: quiz_id=24, class_id=6
-RAW INPUT: {"class_id":6,"class_code":"4FF2ED","title":"quiz 2","questions":[{"type":"truefalse","text":"mahusay si bernadette","correct":"True","choices":null}]}
-EXTRACTED VALUES: class_id=6, class_code=4FF2ED, teacher_id=14, title=quiz 2
-DB FETCH CLASS: {"class_code":"4FF2ED","teacher_id":14}
-QUIZ INSERTED: quiz_id=25, class_id=6
-RAW INPUT: {"class_id":6,"class_code":"4FF2ED","title":"quiz 3","questions":[{"type":"truefalse","text":"she so pretty","correct":"True","choices":null}]}
-EXTRACTED VALUES: class_id=6, class_code=4FF2ED, teacher_id=14, title=quiz 3
-DB FETCH CLASS: {"class_code":"4FF2ED","teacher_id":14}
-QUIZ INSERTED: quiz_id=26, class_id=6
+RAW INPUT: {"class_id":5,"class_code":"49B79C2","title":"English test","questions":[{"type":"identification","text":"1 + 1?","correct":"Extrafraligicoius coillystuffy damn bro , shii","choices":null},{"type":"truefalse","text":"this sis trueeeee","correct":"False","choices":null}]}
+EXTRACTED VALUES: class_id=5, class_code=49B79C2, teacher_id=16, title=English test
+DB FETCH CLASS: {"class_code":"49B79C2","teacher_id":16}
+QUIZ INSERTED: quiz_id=24, class_id=5
+RAW INPUT: {"class_id":5,"class_code":"49B79C2","title":"testing","questions":[{"type":"identification","text":"testing","correct":"testing","choices":null}]}
+EXTRACTED VALUES: class_id=5, class_code=49B79C2, teacher_id=16, title=testing
+DB FETCH CLASS: {"class_code":"49B79C2","teacher_id":16}
+QUIZ INSERTED: quiz_id=25, class_id=5
+RAW INPUT: {"class_id":5,"class_code":"49B79C2","title":"Can i make twoo?","questions":[{"type":"identification","text":"hopefully bruh","correct":"we shall seeeeee","choices":null}]}
+EXTRACTED VALUES: class_id=5, class_code=49B79C2, teacher_id=16, title=Can i make twoo?
+DB FETCH CLASS: {"class_code":"49B79C2","teacher_id":16}
+QUIZ INSERTED: quiz_id=26, class_id=5
+RAW INPUT: {"class_id":5,"class_code":"49B79C2","title":"IT WORKS BBRUHHHH","questions":[{"type":"identification","text":"HELL YEAHH RUHH","correct":"GAWD DAYUMM BRUHH","choices":null}]}
+EXTRACTED VALUES: class_id=5, class_code=49B79C2, teacher_id=16, title=IT WORKS BBRUHHHH
+DB FETCH CLASS: {"class_code":"49B79C2","teacher_id":16}
+QUIZ INSERTED: quiz_id=27, class_id=5
+RAW INPUT: {"class_id":6,"class_code":"793DDEC","title":"Science tessst","questions":[{"type":"identification","text":"testingggg","correct":"tingggtesss","choices":null}]}
+EXTRACTED VALUES: class_id=6, class_code=793DDEC, teacher_id=16, title=Science tessst
+DB FETCH CLASS: {"class_code":"793DDEC","teacher_id":16}
+QUIZ INSERTED: quiz_id=28, class_id=6
+RAW INPUT: {"class_id":6,"class_code":"793DDEC","title":"does it workkk","questions":[{"type":"identification","text":"fuckk yuuuhhh","correct":"it dussssss","choices":null}]}
+EXTRACTED VALUES: class_id=6, class_code=793DDEC, teacher_id=16, title=does it workkk
+DB FETCH CLASS: {"class_code":"793DDEC","teacher_id":16}
+QUIZ INSERTED: quiz_id=29, class_id=6
+RAW INPUT: {"class_id":7,"class_code":"FB402BD","title":"Babymetal Test","questions":[{"type":"multiple","text":"Who is the main Vocalist of Babymetal?","correct":"A","choices":["Suzuka Nakamoto","Moa Kikuchi","Yui MIzuno","Momo Okazaki"]},{"type":"multiple","text":"Who left Babymetal?","correct":"B","choices":["Suzuka Nakamoto","Moa Kikuchi","Yui Mizuno","Momo Okazaki"]},{"type":"identification","text":"Who is the Main death Growler of Babymetal?","correct":"MomoOkazaki","choices":null}]}
+EXTRACTED VALUES: class_id=7, class_code=FB402BD, teacher_id=16, title=Babymetal Test
+DB FETCH CLASS: {"class_code":"FB402BD","teacher_id":16}
+QUIZ INSERTED: quiz_id=30, class_id=7

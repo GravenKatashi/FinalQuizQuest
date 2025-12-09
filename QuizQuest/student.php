@@ -11,6 +11,16 @@ if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 $student_id = $_SESSION['user_id'] ?? 0;
 $student_name = $_SESSION['username'] ?? 'Student';
 
+$full_name = 'User';
+$stmtName = $conn->prepare("SELECT full_name FROM users WHERE id = ?");
+$stmtName->bind_param("i", $user_id);
+$stmtName->execute();
+$resultName = $stmtName->get_result();
+if ($resultName && $rowName = $resultName->fetch_assoc()) {
+    $full_name = $rowName['full_name'];
+}
+$stmtName->close();
+
 $feedback = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -215,10 +225,10 @@ function renderCompletedQuizzes($conn, $student_id) {
     <div class="menu-wrapper">
         <div class="nav">
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='profile.php'){echo 'active';} ?>" href="profile.php">
-                <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($student_name); ?>)
+                <i data-lucide="user"></i> Profile (<?php echo htmlspecialchars($full_name); ?>)
             </a>
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='student.php'){echo 'active';} ?>" href="student.php">
-                <i data-lucide="layout"></i> Quizzes
+                <i data-lucide="layout"></i> Classes
             </a>
             <a class="nav-item <?php if(basename($_SERVER['PHP_SELF'])=='leaderboard.php'){echo 'active';} ?>" href="leaderboard.php">
                 <i data-lucide="award"></i> Leaderboard
